@@ -45,7 +45,6 @@ function activate_jungle_browse_statistics()
 	require_once plugin_dir_path(__FILE__) . 'includes/class-jungle_browse_statistics-activator.php';
 	Jungle_browse_statistics_Activator::activate();
 }
-asdas
 /**
  * 在插件停用时运行的代码。
  * 这个动作在includes/class-jungle_browse_statistics-deactivator.php中有记录。
