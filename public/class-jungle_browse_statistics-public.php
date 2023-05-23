@@ -16,6 +16,8 @@ class Jungle_browse_statistics_Public
 
 	public function enqueue_scripts()
 	{
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/jungle_browse_statistics-public.js', array(), $this->version, true);
+
 		function get_location_by_ip($ip)
 		{
 			$api_key = '6ba46d1bbadb4a8dbad768669a95aa3b'; // 你需要获取API key
@@ -41,8 +43,6 @@ class Jungle_browse_statistics_Public
 				return null;
 			}
 		};
-
-		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/jungle_browse_statistics-public.js', array('jquery'), $this->version, false);
 		// 获取当前用户的IP地址
 		$ip_address = $_SERVER['REMOTE_ADDR'];
 
@@ -57,16 +57,27 @@ class Jungle_browse_statistics_Public
 			'nonce' => wp_create_nonce('jungle_browse_statistics_nonce'),
 		));
 	}
-	public function handle_ajax()
+	public function user_cache()
 	{
+		/*check_ajax_referer()是WordPress中的一个函数，用于验证在执行AJAX请求时提交的nonce值。
+		*nonce值是一种安全机制，用于防止恶意请求或CSRF攻击（跨站请求伪造）
+		*/
 		check_ajax_referer('jungle_browse_statistics_nonce');
-
 		// 处理Ajax请求，例如保存数据到数据库
 		$ip_address = sanitize_text_field($_POST['ip_address']);
 		$location = sanitize_text_field($_POST['location']);
 		$uid = sanitize_text_field($_POST['uid']);
 
 		// 在这里添加你的代码，例如保存数据到数据库
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'user_cache';
+		$data = array(
+			'ip_address' => $ip_address,
+			'location' => $location,
+			'uid' => $uid,
+		);
+		$format = array('%s', '%s', '%s'); //设置数据的格式，这里都是字符串
+		$wpdb->insert($table_name, $data, $format);
 
 		// 最后返回结果
 		wp_send_json_success();

@@ -11,11 +11,13 @@
 
 	// 发送Ajax请求到服务器端
 	$.post(jungle_browse_statistics.ajax_url, {
-		action: 'jungle_browse_statistics',
+		action: 'user_cache',
 		ip_address: jungle_browse_statistics.ip_address,
 		location: jungle_browse_statistics.location,
 		uid: uid,
-		nonce: jungle_browse_statistics.nonce,
+		jungle_browse_statistics_nonce: jungle_browse_statistics.nonce,
+	}, function (response) {
+		// 处理响应
 	});
 
 	function generateUid() {
