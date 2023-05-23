@@ -1,3 +1,4 @@
+import '/utils.js'
 (function ($) {
 	'use strict';
 	var cookieName = 'jungle_browse_statistics_uid';
@@ -10,18 +11,18 @@
 	}
 
 	// 发送Ajax请求到服务器端
+	console.log(jungle_browse_statistics.nonce);
 	$.post(jungle_browse_statistics.ajax_url, {
 		action: 'user_cache',
 		ip_address: jungle_browse_statistics.ip_address,
 		location: jungle_browse_statistics.location,
 		uid: uid,
-		jungle_browse_statistics_nonce: jungle_browse_statistics.nonce,
+		_ajax_nonce: jungle_browse_statistics.nonce,
 	}, function (response) {
 		// 处理响应
 	});
 
 	function generateUid() {
-		// 在这里生成一个唯一的ID
 		return Math.random().toString(36).substr(2, 9);
 	}
 

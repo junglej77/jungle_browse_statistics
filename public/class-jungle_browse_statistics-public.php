@@ -50,11 +50,12 @@ class Jungle_browse_statistics_Public
 		$location = get_location_by_ip($ip_address);
 
 		// 把IP和位置信息传给JavaScript
+
 		wp_localize_script($this->plugin_name, 'jungle_browse_statistics', array(
 			'ajax_url' => admin_url('admin-ajax.php'),
 			'ip_address' => $ip_address,
 			'location' => $location,
-			'nonce' => wp_create_nonce('jungle_browse_statistics_nonce'),
+			'nonce' => wp_create_nonce('jungle_browse_statistics_nonce'), // 后台生成验证安全验证机制码，前台请求_ajax_nonce需要传相关值
 		));
 	}
 	public function user_cache()
@@ -62,6 +63,7 @@ class Jungle_browse_statistics_Public
 		/*check_ajax_referer()是WordPress中的一个函数，用于验证在执行AJAX请求时提交的nonce值。
 		*nonce值是一种安全机制，用于防止恶意请求或CSRF攻击（跨站请求伪造）
 		*/
+
 		check_ajax_referer('jungle_browse_statistics_nonce');
 		// 处理Ajax请求，例如保存数据到数据库
 		$ip_address = sanitize_text_field($_POST['ip_address']);
