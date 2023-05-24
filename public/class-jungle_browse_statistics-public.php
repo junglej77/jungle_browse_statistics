@@ -68,7 +68,8 @@ class Jungle_browse_statistics_Public
 		// 处理Ajax请求，例如保存数据到数据库
 		$ip_address = sanitize_text_field($_POST['ip_address']);
 		$location = sanitize_text_field($_POST['location']);
-		$uid = sanitize_text_field($_POST['uid']);
+		$session_id = sanitize_text_field($_POST['session_id']);
+		$u_id = sanitize_text_field($_POST['u_id']);
 
 		// 在这里添加你的代码，例如保存数据到数据库
 		global $wpdb;
@@ -76,7 +77,8 @@ class Jungle_browse_statistics_Public
 		$data = array(
 			'ip_address' => $ip_address,
 			'location' => $location,
-			'uid' => $uid,
+			'session_id' => $session_id,
+			'u_id' => $u_id,
 		);
 		$format = array('%s', '%s', '%s'); //设置数据的格式，这里都是字符串
 		$wpdb->insert($table_name, $data, $format);
