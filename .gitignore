@@ -1,1 +1,3 @@
 node_modules
+admin/css/**.js
+public/css/**.js
