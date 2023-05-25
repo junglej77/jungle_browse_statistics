@@ -1,6 +1,6 @@
 <?php
 global $wpdb;
-$table_name = $wpdb->prefix . 'jungle_statistics_user_cache';
+$table_name = $wpdb->prefix . 'jungle_statistics_pages_view';
 //检查数据表是否已经存在
 if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
     // 创建数据表
@@ -8,14 +8,11 @@ if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
 
     $sql = "CREATE TABLE $table_name (
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
-                ip_address VARCHAR(45) NOT NULL,
-                countryCode VARCHAR(100) NOT NULL,
-                country VARCHAR(100) NOT NULL,
-                state_province VARCHAR(100) NOT NULL,
-                city VARCHAR(100) NOT NULL,
                 cache_ip TEXT NOT NULL,
-                u_id INT NULL,
-                first_stored_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                current_page VARCHAR(200) NOT NULL,
+                referrer_page VARCHAR(200) NOT NULL,
+                enter_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                leave_time TIMESTAMP NULL,
                 PRIMARY KEY id (id)
             ) $charset_collate;";
 

@@ -34,6 +34,7 @@ class Jungle_browse_statistics
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-jungle_browse_statistics-i18n.php';
 		require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-jungle_browse_statistics-admin.php';
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-jungle_browse_statistics-public.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-jungle_browse_statistics-tools.php'; // 自定义工具函数
 		$this->loader = new Jungle_browse_statistics_Loader();
 	}
 	/**
