@@ -15,12 +15,6 @@ let cssEntries = {
     'public/css/jungle_browse_statistics-public': './src/public/less/jungle_browse_statistics-public.less',
     'admin/css/jungle_browse_statistics-admin': './src/admin/less/jungle_browse_statistics-admin.less',
 };
-// let cssEntries = {};
-// const lessFiles = glob.sync('./src/**/*.less');
-// lessFiles.forEach((filepath) => {
-//     const entry = filepath.replace('/src/', '/').replace('.less', '');
-//     cssEntries[entry] = filepath;
-// });
 
 // JavaScript 配置
 const jsConfig = {
@@ -38,7 +32,16 @@ const jsConfig = {
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['@babel/preset-env']
+                        presets: [
+                            [
+                                '@babel/preset-env',
+                                {
+                                    targets: '> 0.25%, not dead',
+                                    useBuiltIns: 'usage',
+                                    corejs: 3,
+                                },
+                            ],
+                        ],
                     }
                 }
             },

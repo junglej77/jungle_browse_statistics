@@ -13,6 +13,10 @@ function user_cache()
     /**************************************************************************************获取当前用户的IP地址 */
     // $ip_address = JungleBrowseStatisticsTools::get_location_ip_address();
     $ip_address = '116.25.106.143';
+    /**************************************************************************************获取设备*/
+    $device = JungleBrowseStatisticsTools::get_device_name($user_agent);
+    /**************************************************************************************获取浏览器*/
+    $browser = JungleBrowseStatisticsTools::get_browser_name($user_agent);
     /**************************************************************************************获取IP地址的位置信息 */
     // 获取IP地址的位置信息，你需要使用你自己的函数替换下面的代码
     $location = JungleBrowseStatisticsTools::get_location_by_ip($ip_address);
@@ -37,6 +41,8 @@ function user_cache()
             'state_province' => isset($location) ? $location['regionName'] : '',
             'city' => isset($location) ? $location['city'] : '',
             'cache_ip' => $cache_ip,
+            'device' => $device,
+            'browser' => $browser,
         );
         $format = array('%s', '%s', '%s', '%s', '%s'); //设置数据的格式，这里都是字符串
         $wpdb->insert($table_name_user_cache, $data, $format);
@@ -44,13 +50,11 @@ function user_cache()
         /**************************************************************************************用户是否登录 */
         if (is_user_logged_in()) {
             $user_logged_id = get_current_user_id();
-            $data = array(
+            $wpdb->update($table_name_user_cache, array(
                 'u_id' => $user_logged_id,
-            );
-            $where = array(
+            ), array(
                 'cache_ip' => $cache_ip    // 唯一缓存ip
-            );
-            $wpdb->update($table_name_user_cache, $data, $where);
+            ));
         }
     }
     /**************************************************************************************获取当前访问页面 */
@@ -59,10 +63,6 @@ function user_cache()
     $referrer = wp_get_referer();
     /**************************************************************************************cache_ip为核心判断是新老访客*/
     $is_new = JungleBrowseStatisticsTools::is_new_visitor($wpdb, $table_name_user_cache, $cache_ip);
-    /**************************************************************************************获取设备*/
-    $device = JungleBrowseStatisticsTools::get_device_name($user_agent);
-    /**************************************************************************************获取浏览器*/
-    $browser = JungleBrowseStatisticsTools::get_browser_name($user_agent);
     /**************************************************************************************cache_ip为核心判断在线用户表中是否记录用户*/
     $is_online = JungleBrowseStatisticsTools::is_online_visitor($wpdb, $table_name_user_online, $cache_ip);
     $online_user = array(

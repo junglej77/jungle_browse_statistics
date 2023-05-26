@@ -9,6 +9,8 @@ if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
     $sql = "CREATE TABLE $table_name (
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 ip_address VARCHAR(45) NOT NULL,
+                browser VARCHAR(100) NOT NULL,
+                device VARCHAR(100) NOT NULL,
                 countryCode VARCHAR(100) NOT NULL,
                 country VARCHAR(100) NOT NULL,
                 state_province VARCHAR(100) NOT NULL,
