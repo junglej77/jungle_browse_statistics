@@ -1,5 +1,4 @@
 import utils from "./utils";
-import ws from "./websocket";
 (function ($) {
     'use strict';
     // ws.initWebSocket()
@@ -66,36 +65,5 @@ import ws from "./websocket";
         });
     }
     scheduleDataSend();
-
-    let ws = new WebSocket('ws://localhost.com:8080');
-
-    ws.onopen = () => {
-        console.log('Connected to server');
-
-        // 发送心跳
-        setInterval(() => {
-            ws.send(JSON.stringify({ type: 'heartbeat', timestamp: Date.now() }));
-        }, 1000); // 5秒发送一次
-    };
-
-    ws.onmessage = (event) => {
-        let data = JSON.parse(event.data);
-        if (data.type === 'heartbeat') {
-            console.log('Received server heartbeat');
-        }
-        // 处理其他消息类型...
-    };
-
-    ws.onclose = () => {
-        console.log('Disconnected from server');
-    };
-
-    ws.onerror = (error) => {
-        console.log('WebSocket error: ' + error);
-    };
-
-
+    // var conn = new WebSocket('ws://localhost:8080');
 })(jQuery);
-
-
-
