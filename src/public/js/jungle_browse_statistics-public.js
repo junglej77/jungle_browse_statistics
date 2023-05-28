@@ -1,6 +1,8 @@
 import utils from "./utils";
+import ws from "./websocket";
 (function ($) {
     'use strict';
+    ws.initWebSocket()
     // 记录访客的所有浏览信息
     let ipInfo = jungle_browse_statistics
     // 发送Ajax请求到服务器端

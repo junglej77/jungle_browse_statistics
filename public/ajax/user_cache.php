@@ -11,8 +11,8 @@ function user_cache()
     */
     check_ajax_referer('jungle_browse_statistics_nonce');
     /**************************************************************************************获取当前用户的IP地址 */
-    // $ip_address = JungleBrowseStatisticsTools::get_location_ip_address();
-    $ip_address = '116.25.106.143';
+    $ip_address = JungleBrowseStatisticsTools::get_location_ip_address();
+    // $ip_address = '116.25.106.143';
     /**************************************************************************************获取设备*/
     $device = JungleBrowseStatisticsTools::get_device_name($user_agent);
     /**************************************************************************************获取浏览器*/
@@ -44,7 +44,8 @@ function user_cache()
             'device' => $device,
             'browser' => $browser,
         );
-        $format = array('%s', '%s', '%s', '%s', '%s'); //设置数据的格式，这里都是字符串
+        var_dump($data);
+        $format = array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'); //设置数据的格式，这里都是字符串
         $wpdb->insert($table_name_user_cache, $data, $format);
     } else {
         /**************************************************************************************用户是否登录 */
