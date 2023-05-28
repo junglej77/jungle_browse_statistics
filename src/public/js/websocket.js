@@ -3,7 +3,7 @@ var isConnect = false; //连接状态
 var globalCallback = function (e) { };//定义外部接收数据的回调函数
 var reConnectNum = 0;//重连次数
 var heartBeatDataInterval = 30;//发送心跳包间隔时间基本单位(秒)
-var websocketUrl = 'ws://localhost/webSocket';
+var websocketUrl = 'ws://localhost/webSocket:8080';
 //心跳设置
 var heartCheck = {
     heartbeatData: {

@@ -2,8 +2,6 @@
 require_once 'ajax/index.php'; // 引入所有的ajax
 class Jungle_browse_statistics_Public
 {
-	private $plugin_name;
-	private $version;
 	public function __construct($plugin_name, $version)
 	{
 
