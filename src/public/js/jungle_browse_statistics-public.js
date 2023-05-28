@@ -1,6 +1,25 @@
 import utils from "./utils";
 (function ($) {
     'use strict';
+    var ws = new WebSocket('ws://localhost:8080');
+
+    ws.onopen = () => {
+        console.log('WebSocket连接已成功建立');
+        // 连接成功后发送消息给前端
+        ws.send('1111111');
+    };
+
+    ws.onclose = (event) => {
+        console.log('WebSocket连接已关闭');
+    };
+
+    ws.onerror = (error) => {
+        console.log('WebSocket连接错误:', error);
+    };
+
+    ws.onmessage = (event) => {
+        console.log('接收到服务器消息:', event.data);
+    };
     // ws.initWebSocket()
     // 记录访客的所有浏览信息
     let ipInfo = jungle_browse_statistics
@@ -33,6 +52,9 @@ import utils from "./utils";
         /*****监听用户一切可能的行为， */
         // 1. 为了避免用户正在活跃中，突然断网（这种类似的用户行为）所以在活跃中的的用户，
         function resetTimer(action) {
+            if (action == 'click') {
+                ws.send(action.type + ': ' + utils.getCurentTime());
+            }
             console.log((action ? action.type : '开始执行时') + ': ' + utils.getCurentTime());
             clearTimeout(timeoutId);
             userIsActive = true;
@@ -65,5 +87,6 @@ import utils from "./utils";
         });
     }
     scheduleDataSend();
-    // var conn = new WebSocket('ws://localhost:8080');
+
+
 })(jQuery);

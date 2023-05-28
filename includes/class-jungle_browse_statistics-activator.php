@@ -9,5 +9,12 @@ class Jungle_browse_statistics_Activator
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/create_table/create_pages_view.php';
 		//创建用户在线表
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/create_table/create_user_online.php';
+		register_activation_hook(__FILE__, 'start_websocket_server');
+
+		function start_websocket_server()
+		{
+			// 这个命令应该指向你的 WebSocket 服务器脚本
+			exec('php includes/MessageComponentInterface.php > /dev/null 2>&1 &');
+		}
 	}
 }
