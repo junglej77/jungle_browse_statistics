@@ -63,6 +63,9 @@ register_deactivation_hook(__FILE__, 'deactivate_jungle_browse_statistics');
  */
 require plugin_dir_path(__FILE__) . 'includes/class-jungle_browse_statistics.php';
 
+//引入类
+require plugin_dir_path(__FILE__) . 'includes/service/class-user_service.php';
+
 /**
  * 开始执行该插件。
  *

@@ -16,5 +16,8 @@ class Jungle_browse_statistics_Activator
 			// 这个命令应该指向你的 WebSocket 服务器脚本
 			exec('php includes/MessageComponentInterface.php > /dev/null 2>&1 &');
 		}
+
+		//创建当前页面在线人数数据option
+		add_option("jungle_browse_statistics_online_count",0);
 	}
 }
