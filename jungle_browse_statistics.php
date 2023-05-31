@@ -58,19 +58,13 @@ function deactivate_jungle_browse_statistics()
 register_activation_hook(__FILE__, 'activate_jungle_browse_statistics');
 // register_activation_hook(__FILE__, 'start_web_socket');
 
-//websocket功能需要用命令行启动，否则会一直前台跑。
-function start_web_socket(){
-	require_once plugin_dir_path(__FILE__) . 'includes/service/class-web_socket_server.php';
-
-	$config=array(
-		'address'=>'127.0.0.1',
-		'port'=>'8088',
-		'event'=>'WSevent',//回调函数的函数名
-		'log'=>false,
-		);
-	$webSocketServer = new WebSocketServer($config);
-	$webSocketServer->run();
-}
+// //websocket功能需要用命令行启动
+// function start_web_socket(){
+// 	{
+// 		// 这个命令应该指向你的 WebSocket 服务器脚本
+// 		exec('php includes/service/class-web_socket_server.php > /dev/null 2>&1 &');
+// 	}
+// }
 register_deactivation_hook(__FILE__, 'deactivate_jungle_browse_statistics');
 
 /**
