@@ -1,7 +1,7 @@
 <?php
 include 'class-yousen_websocket.php';
 $k_cache_ip;
-$config=array('address'=>'192.168.101.69',
+$config=array('address'=>'127.0.0.1',
   'port'=>'8088',
   'event'=>'WSevent', //回调函数的函数名
   'log'=>false,
@@ -18,13 +18,13 @@ function WSevent($type, $event) {
     $websocket->log('client in,id:'.$event['k']);
   }elseif('out'==$type) {
     $websocket->log('client out,id:'.$event['k']);
-    updateLeaveTime($event['k'],$k_cache_ip);
+    updateLeaveTime($event['k'],$k_cache_ip,true);
   }elseif('msg'==$type) {
     $websocket->log($event['k'].'message:'.$event['msg']);
     handleMsg($event, $k_cache_ip);
   }elseif('timeout'==$type){
     $websocket->log('client timeout,id:'.$event['k']);
-    updateLeaveTime($event['k'],$k_cache_ip);
+    updateLeaveTime($event['k'],$k_cache_ip,true);
   }
 }
 
@@ -41,15 +41,16 @@ function handleMsg($event, $k_cache_ip) {
   }else {
     $k_cache_ip[$event['k']]=$value;
   }
+  $websocket->write($event['sign'], 'done:'.$cache_ip.$event['k']);
   //校验是否有超时的，超时就移除
     foreach ($k_cache_ip as $key => $value) {
       if($value['leave_time']-$timestamp<-6){
-        updateLeaveTime($key,$k_cache_ip);
+        updateLeaveTime($key,$k_cache_ip,false);
       }
     }
-  $websocket->write($event['sign'], 'done:'.$cache_ip.$event['k']);
 }
-function updateLeaveTime($k,$k_cache_ip){
+
+function updateLeaveTime($k,$k_cache_ip,$closeFlag){
   global $k_cache_ip;
     // 检查某个键是否存在  
     if (isset($k_cache_ip[$k])) {
@@ -69,7 +70,9 @@ function updateLeaveTime($k,$k_cache_ip){
     
     $conn->close();
       // 删除某个键值对  
+    if($closeFlag){
       unset($k_cache_ip[$k]);
+    }
     }
 }
 ?>

@@ -86,7 +86,6 @@ require plugin_dir_path(__FILE__) . 'includes/service/user_service.php';
  */
 function run_jungle_browse_statistics()
 {
-
 	$plugin = new Jungle_browse_statistics();
 	$plugin->run();
 }
