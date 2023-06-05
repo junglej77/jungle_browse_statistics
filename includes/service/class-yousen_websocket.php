@@ -60,7 +60,7 @@ class websocket{
 
     function WebSocket($address,$port){
         $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        socket_set_option($server, SOL_SOCKET, SO_REUSEADDR, 1);
+        socket_set_option($server, SOL_SOCKET, SO_KEEPALIVE, 1);
         socket_bind($server, $address, $port);
         socket_listen($server);
         $this->log('开始监听: '.$address.' : '.$port);

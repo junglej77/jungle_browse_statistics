@@ -9,12 +9,8 @@ class Jungle_browse_statistics_Activator
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/create_table/create_pages_view.php';
 		//创建用户在线表
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/create_table/create_user_online.php';
-		
-		// 这个命令应该指向你的 WebSocket 服务器脚本
-		exec('php D:\yousen\phpstudy_pro\WWW\www.yousentest.com\wp-content\plugins\jungle_browse_statistics\includes\service\class-web_socket_server.php');
 		//创建当前页面在线人数数据option
 		add_option("jungle_browse_statistics_online_count",0);
-		//
 	}
 }
 ?>
