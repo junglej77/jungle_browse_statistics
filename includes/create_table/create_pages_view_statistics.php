@@ -1,6 +1,6 @@
 <?php
 global $wpdb;
-$table_name = $wpdb->prefix . 'jungle_statistics_pages_view';
+$table_name = $wpdb->prefix . 'jungle_statistics_pages_view_statistics';
 //检查数据表是否已经存在
 if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
     // 创建数据表
@@ -9,12 +9,8 @@ if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
     $sql = "CREATE TABLE $table_name (
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 cache_ip TEXT NOT NULL,
-                current_page VARCHAR(200) NOT NULL,
-                referrer_page VARCHAR(200) NOT NULL,
-                enter_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                leave_time TIMESTAMP NULL,
-                `view_time` int(0) NULL DEFAULT NULL,
-                `socket_out_flag` tinyint(0) NULL DEFAULT 0 COMMENT '1.关闭网站时访问的页面',
+                view_page VARCHAR(200) NOT NULL,
+                view_time int(0) NULL DEFAULT NULL,
                 PRIMARY KEY id (id)
             ) $charset_collate;";
 

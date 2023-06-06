@@ -95,7 +95,7 @@ function user_cache()
         'enter_time' => current_time('Y-m-d H:i:s'),
     );
     //先把该cache_ip最后一次的访问记录离开时间更新了
-    update_leave_time();
+    update_leave_time($cache_ip);
     $wpdb->insert($table_name_pages_view, $page_viewed);
     $echo = array(
         'device' => $device,
@@ -110,30 +110,34 @@ function user_cache()
     );
     /**************************************************************************************启动数据表五分钟一更新（*******没成功， 只能页面刷新一次启动一次*******）*/
     //检查是否已经开启了定时任务
-    $jungle_browse_statistics_cron_flag = wp_schedule_event('jungle_browse_statistics_cron_hook');
+    $jungle_browse_statistics_online_count_cron_flag = wp_schedule_event('jungle_browse_statistics_online_count_cron_hook');
     //未开启就开启
-    if(!$jungle_browse_statistics_cron_flag){
-        create_jungle_browse_statistics_cron();
+    if(!$jungle_browse_statistics_online_count_cron_flag){
+        create_jungle_browse_statistics_online_count_cron();
     }
     // 最后返回结果
     wp_send_json_success($echo);
 }
 
 /**
- * 更新访客页面离开页面时间
+ * 更新访客页面离开页面时间,TODO 这里逻辑不严谨，未准确检测到同一用户访问离开时间，需要加强
  */
 function update_leave_time($cache_ip){
     //先判断访客最近一次的时间距离这次请求的时间
-    $sql = "select cache_ip,leave_time from `{$table_name_pages_view}' limit 1";
+    $sql = "select cache_ip,enter_time,leave_time from `{$table_name_pages_view}' where cache_ip = ${cache_ip} limit 1";
 	$row = $wpdb->get_row( $sql, ARRAY_A );
 	
 	$cache_ip = $row['cache_ip'];
+	$enter_time = $row['enter_time'];
 	$leave_time = $row['leave_time'];
 
     //暂认为无离开时间就是对的。
     if($cache_ip[0]!=null && $leave_time[0]==null){
+        $current_time = current_time('Y-m-d H:i:s');
+        $view_time = computeViewTime($enter_time,$current_time);
         $wpdb->update($table_name_pages_view, array(
-            'leave_time' => current_time('Y-m-d H:i:s'),
+            'leave_time' => $current_time,
+            'view_time' => $view_time,
         ),  array(
             'cache_ip' => $cache_ip
         ));
@@ -141,17 +145,25 @@ function update_leave_time($cache_ip){
 }
 
 /**
+ * 计算页面访问时间
+ */
+function computeViewTime($enter_time,$current_time){
+    $startTime = strtotime($enter_time);
+    $endTime = strtotime($current_time);
+    return $endTime - $startTime;
+}
+/**
  * 创建定时任务动作
  */
-function create_jungle_browse_statistics_cron(){
+function create_jungle_browse_statistics_online_count_cron(){
     //首先创建时间间隔
-    add_filter( 'cron_schedules', 'jungle_browse_statistics_cron_interval' );
-    add_action( 'jungle_browse_statistics_cron_hook', 'jungle_browse_statistics_cron_exec' );
+    add_filter( 'cron_schedules', 'jungle_browse_statistics_online_count_cron_interval' );
+    add_action( 'jungle_browse_statistics_online_count_cron_hook', 'jungle_browse_statistics_online_count_cron_exec' );
     //立刻执行，随后每300秒执行一次
-    wp_schedule_event( time(), 'three_hundred_seconds', 'jungle_browse_statistics_cron_hook' );
+    wp_schedule_event( time(), 'three_hundred_seconds', 'jungle_browse_statistics_online_count_cron_hook' );
 }
 
-function jungle_browse_statistics_cron_interval( $schedules ) { 
+function jungle_browse_statistics_online_count_cron_interval( $schedules ) { 
     $schedules['three_hundred_seconds'] = array(
         'interval' => 300,
         'display'  => esc_html__( 'Every 300 Seconds' ), );
@@ -161,12 +173,12 @@ function jungle_browse_statistics_cron_interval( $schedules ) {
 /**
  * 统计在线人数定时任务执行器
  */
-function jungle_browse_statistics_cron_exec(){
+function jungle_browse_statistics_online_count_cron_exec(){
     //先统计有多少在线人数，为0就停止
     $online_count=JungleBrowseStatisticsTools::look_online_visitor_count();
-    if($online_count=0){
-        $timestamp = wp_next_scheduled( 'jungle_browse_statistics_cron_hook' );
-        wp_unschedule_event( $timestamp, 'jungle_browse_statistics_cron_hook' );
+    if($online_count==0){
+        $timestamp = wp_next_scheduled( 'jungle_browse_statistics_online_count_cron_hook' );
+        wp_unschedule_event( $timestamp, 'jungle_browse_statistics_online_count_cron_hook' );
     }
     //更新在线人数到option
     update_option("jungle_browse_statistics_online_count",$online_count);
