@@ -4,7 +4,7 @@ $k_cache_ip;
 $config=array('address'=>'127.0.0.1',
   'port'=>'8088',
   'event'=>'WSevent', //回调函数的函数名
-  'log'=>true,
+  'log'=>false,
 );
 $websocket=new websocket($config);
 $websocket->run();
