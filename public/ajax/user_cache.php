@@ -95,7 +95,7 @@ function user_cache()
         'enter_time' => current_time('Y-m-d H:i:s'),
     );
     //先把该cache_ip最后一次的访问记录离开时间更新了
-    update_leave_time($cache_ip);
+    update_leave_time($table_name_pages_view,$wpdb,$cache_ip);
     $wpdb->insert($table_name_pages_view, $page_viewed);
     $echo = array(
         'device' => $device,
@@ -110,9 +110,9 @@ function user_cache()
     );
     /**************************************************************************************启动数据表五分钟一更新（*******没成功， 只能页面刷新一次启动一次*******）*/
     //检查是否已经开启了定时任务
-    $jungle_browse_statistics_online_count_cron_flag = wp_schedule_event('jungle_browse_statistics_online_count_cron_hook');
+    $jungle_browse_statistics_cron_flag = wp_schedule_event(time(), 'daily','jungle_browse_statistics_cron_hook');
     //未开启就开启
-    if(!$jungle_browse_statistics_online_count_cron_flag){
+    if(!$jungle_browse_statistics_cron_flag){
         create_jungle_browse_statistics_online_count_cron();
     }
     // 最后返回结果
@@ -122,11 +122,11 @@ function user_cache()
 /**
  * 更新访客页面离开页面时间,TODO 这里逻辑不严谨，未准确检测到同一用户访问离开时间，需要加强
  */
-function update_leave_time($cache_ip){
+function update_leave_time($table_name_pages_view,$wpdb,$cache_ip){
     //先判断访客最近一次的时间距离这次请求的时间
-    $sql = "select cache_ip,enter_time,leave_time from `{$table_name_pages_view}' where cache_ip = ${cache_ip} limit 1";
+    $sql = "select cache_ip,enter_time,leave_time from `{$table_name_pages_view}' where cache_ip =".$cache_ip. "limit 1";
 	$row = $wpdb->get_row( $sql, ARRAY_A );
-	
+
 	$cache_ip = $row['cache_ip'];
 	$enter_time = $row['enter_time'];
 	$leave_time = $row['leave_time'];
@@ -163,7 +163,7 @@ function create_jungle_browse_statistics_online_count_cron(){
     wp_schedule_event( time(), 'three_hundred_seconds', 'jungle_browse_statistics_online_count_cron_hook' );
 }
 
-function jungle_browse_statistics_online_count_cron_interval( $schedules ) { 
+function jungle_browse_statistics_online_count_cron_interval( $schedules ) {
     $schedules['three_hundred_seconds'] = array(
         'interval' => 300,
         'display'  => esc_html__( 'Every 300 Seconds' ), );

@@ -8,7 +8,6 @@ $config=array('address'=>'127.0.0.1',
 );
 $websocket=new websocket($config);
 $websocket->run();
-checkTimeOut();
 
 function WSevent($type, $event) {
   global $websocket;
@@ -38,7 +37,7 @@ function handleMsg($event, $k_cache_ip) {
   $timestamp = time();
   $value = array('ip'=>$cache_ip,'current_page'=>$page,'leave_time'=>$timestamp);
   if(empty($k_cache_ip)) {
-    // 向Map中添加键值对  
+    // 向Map中添加键值对
     $k_cache_ip=array();
     $k_cache_ip[$event['k']]=$value;
   }else {
@@ -49,18 +48,18 @@ function handleMsg($event, $k_cache_ip) {
 
 function updateLeaveTime($k,$k_cache_ip){
   global $k_cache_ip;
-    // 检查某个键是否存在  
+    // 检查某个键是否存在
     if (isset($k_cache_ip[$k])) {
       $cache_ip=$k_cache_ip[$k]['ip'];
       $page=$k_cache_ip[$k]['current_page'];
-          
+
     // 创建连接
-    $conn = new mysqli("localhost", "yousentest", "siYaojing.748", "www_yousentest_com");
+    $conn = new mysqli("localhost", "www_grdtest_com", "jW4QmYmmDs", "wp");
     // Check connection
     if ($conn->connect_error) {
         die("连接失败: " . $conn->connect_error);
-    } 
-    
+    }
+
     $sql = "select enter_time from `wp_jungle_statistics_pages_view' where cache_ip = $cache_ip limit 1";
   $result = $conn->query($sql);
   $enter_time;
@@ -68,16 +67,16 @@ function updateLeaveTime($k,$k_cache_ip){
     $row = $result->fetch_assoc();
     $enter_time =  $row["leave_time"];
     }
-    $formatted_time = strftime('%Y-%m-%d %H:%M:%S', time()); 
+    $formatted_time = strftime('%Y-%m-%d %H:%M:%S', time());
     $view_time = computeViewTime($enter_time,$formatted_time);
-    
-    $sql="UPDATE wp_jungle_statistics_pages_view SET leave_time='".$formatted_time."' ,socket_out_flag = 1, view_time = ${view_time}  
+
+    $sql="UPDATE wp_jungle_statistics_pages_view SET leave_time='".$formatted_time."' ,socket_out_flag = 1, view_time = ${view_time}
     WHERE cache_ip='".$cache_ip."' AND current_page ='".$page."'
     limit 1 ";
     $result = $conn->query($sql);
-    
+
     $conn->close();
-      // 删除某个键值对  
+      // 删除某个键值对
       unset($k_cache_ip[$k]);
     }
 }

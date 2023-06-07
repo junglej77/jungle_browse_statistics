@@ -13,28 +13,20 @@ class Jungle_browse_statistics_Activator
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/create_table/create_pages_view_statistics.php';
 		//创建当前页面在线人数数据option
 		add_option("jungle_browse_statistics_online_count",0);
-		
+
 		//检查是否已经开启了定时任务
-		$jungle_browse_statistics_cron_flag = wp_schedule_event('jungle_browse_statistics_cron_hook');
+		$jungle_browse_statistics_cron_flag = wp_schedule_event(time(), 'daily','jungle_browse_statistics_cron_hook');
 		//未开启就开启
 		if(!$jungle_browse_statistics_cron_flag){
-			create_jungle_browse_statistics_cron();
+			// //首先创建时间间隔
+			// add_filter( 'cron_schedules', 'jungle_browse_statistics_cron_interval' );
+			add_action( 'jungle_browse_statistics_cron_hook', 'jungle_browse_statistics_cron_exec' );
+			//立刻执行，随后每天执行一次
+			wp_schedule_event( time(), 'daily', 'jungle_browse_statistics_cron_hook' );
 		}
 	}
 
-	
-/**
- * 创建定时任务动作
- */
-function create_jungle_browse_statistics_cron(){
-    // //首先创建时间间隔
-    // add_filter( 'cron_schedules', 'jungle_browse_statistics_cron_interval' );
-    add_action( 'jungle_browse_statistics_cron_hook', 'jungle_browse_statistics_cron_exec' );
-    //立刻执行，随后每天执行一次
-    wp_schedule_event( time(), 'daily', 'jungle_browse_statistics_cron_hook' );
-}
-
-// function jungle_browse_statistics_cron_interval( $schedules ) { 
+// function jungle_browse_statistics_cron_interval( $schedules ) {
     // $schedules['daily'] = array(
         // 'interval' => DAY_IN_SECONDS,
         // 'display'  => esc_html__( 'Once Daily' ), );
@@ -44,14 +36,14 @@ function create_jungle_browse_statistics_cron(){
 /**
  * 统计每天访问情况的定时任务执行器
  */
-function jungle_browse_statistics_cron_exec(){
+public function jungle_browse_statistics_cron_exec(){
     global $wpdb;
     $table_name_pages_view = $wpdb->prefix . 'jungle_statistics_pages_view';
 	//直接统计访问时长viewTime，
-	
+
 	$startTime = strtotime("now");
 	$endTime = strtotime("-1 day");
-    $querySql = "SELECT cache_ip,current_page, SUM(view_time) as view_time 
+    $querySql = "SELECT cache_ip,current_page, SUM(view_time) as view_time
 	FROM $table_name_pages_view
 	where enter_time BETWEEN '${startTime}' AND '${endTime}'
 	GROUP BY cache_ip,current_page";

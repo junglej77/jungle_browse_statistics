@@ -1,12 +1,11 @@
 import utils from "./utils";
 (function ($) {
     'use strict';
-    var ws = new WebSocket('ws://localhost:8080');
+    var ws = new WebSocket('ws://127.0.0.1:8088');
 
     ws.onopen = () => {
-        console.log('WebSocket连接已成功建立');
         // 连接成功后发送消息给前端
-        ws.send('1111111');
+        ws.send('WebSocket连接已成功建立');
     };
 
     ws.onclose = (event) => {
@@ -52,32 +51,30 @@ import utils from "./utils";
         /*****监听用户一切可能的行为， */
         // 1. 为了避免用户正在活跃中，突然断网（这种类似的用户行为）所以在活跃中的的用户，
         function resetTimer(action) {
-            if (action == 'click') {
-                ws.send(action.type + ': ' + utils.getCurentTime());
-            }
-            console.log((action ? action.type : '开始执行时') + ': ' + utils.getCurentTime());
+            // if (action || action.type == 'click') {
+            //     ws.send(action.type + ': ' + utils.getCurentTime());
+            // }
             clearTimeout(timeoutId);
             userIsActive = true;
             timeoutId = setTimeout(() => {
                 userIsActive = false;
-                console.log('没动啦：' + utils.getCurentTime());
-            }, 5000);
+                ws.send('用户没操作啦：' + utils.getCurentTime());
+            }, 4000);
         }
 
         window.addEventListener('click', resetTimer);
         window.addEventListener('mousemove', resetTimer);
         window.addEventListener('keydown', resetTimer);
+        window.addEventListener('scroll', resetTimer);
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) {
-                console.log('Tab is not in focus');
+                ws.send('离开页面：' + ipInfo.page_url);
             } else {
-                console.log('Tab is in focus');
+                ws.send('进入页面：' + ipInfo.page_url);
             }
         });
 
         resetTimer();  // Start the timer
-
-
     }
 
     function scheduleDataSend() {
@@ -87,6 +84,4 @@ import utils from "./utils";
         });
     }
     scheduleDataSend();
-
-
 })(jQuery);
