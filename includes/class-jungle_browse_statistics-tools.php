@@ -89,7 +89,7 @@ class JungleBrowseStatisticsTools
 	// 在这里生成一个唯一的缓存值（ip+当前时间戳）
 	public static function generate_cache_ip($ip)
 	{
-		return time() . '#' . $ip;
+		return time() . '-' . $ip;
 	}
 	// 判断访客是否是新访客，24小时之后再次访问就算老访客
 	public static function is_new_visitor($wpdb, $table_name, $cache_ip)
@@ -147,15 +147,15 @@ class JungleBrowseStatisticsTools
 			// ... 执行更新操作
 		}
 	}
+	public function delete_old_records()
+	{
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
+		// 删除 now_time 和当前时间相差超过300秒的记录
+		$wpdb->query("
+		DELETE FROM $table_name
+		WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(now_time) > 15
+			");
+	}
 }
 
-function delete_old_records()
-{
-	global $wpdb;
-	$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
-	// 删除 now_time 和当前时间相差超过300秒的记录
-	$wpdb->query("
-	DELETE FROM $table_name
-    WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(now_time) > 15
-		");
-}

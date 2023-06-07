@@ -75,12 +75,12 @@ require plugin_dir_path(__FILE__) . 'includes/class-jungle_browse_statistics.php
 //引入类
 require plugin_dir_path(__FILE__) . 'includes/service/user_service.php';
 
-register_activation_hook(__FILE__, 'start_websocket_server');
-function start_websocket_server()
-{
-	// linux版本
-	exec('php '.plugin_dir_path(__FILE__) . '\includes\service\class-web_socket_server.php > &');
-}
+// register_activation_hook(__FILE__, 'start_websocket_server');
+// function start_websocket_server()
+// {
+// 	// linux版本
+// 	exec('php '.plugin_dir_path(__FILE__) . '\includes\service\class-web_socket_server.php > &');
+// }
 /**
  * 开始执行该插件。
  *

@@ -15,7 +15,7 @@ class Jungle_browse_statistics_Activator
 		add_option("jungle_browse_statistics_online_count",0);
 
 		//检查是否已经开启了定时任务
-		$jungle_browse_statistics_cron_flag = wp_schedule_event(time(), 'daily','jungle_browse_statistics_cron_hook');
+		$jungle_browse_statistics_cron_flag = wp_next_scheduled( 'jungle_browse_statistics_cron_hook' );
 		//未开启就开启
 		if(!$jungle_browse_statistics_cron_flag){
 			// //首先创建时间间隔
