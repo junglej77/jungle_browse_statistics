@@ -134,6 +134,7 @@ function jungle_browse_statistics_cron_interval( $schedules ) {
  */
 function update_leave_time($ip){
     //先判断访客最近一次的时间距离这次请求的时间
+    //TODO 这里通过wpdb获取当前数据库的信息。
     $conn = new mysqli("localhost", "yousentest", "siYaojing.748", "www_yousentest_com");
     // // Check connection
     if ($conn->connect_error) {
