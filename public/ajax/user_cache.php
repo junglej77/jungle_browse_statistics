@@ -120,19 +120,19 @@ function user_cache()
 }
 
 /**
- * 更新访客页面离开页面时间,TODO 这里逻辑不严谨，未准确检测到同一用户访问离开时间，需要加强
+ * 更新访客页面离开页面时间,
  */
 function update_leave_time($table_name_pages_view,$wpdb,$cache_ip){
     //先判断访客最近一次的时间距离这次请求的时间
-    $sql = "select cache_ip,enter_time,leave_time from `{$table_name_pages_view}' where cache_ip =".$cache_ip. "limit 1";
-	$row = $wpdb->get_row( $sql, ARRAY_A );
+    $sql = "select enter_time,leave_time from ? where cache_ip =? order by id desc limit 1";
+    $params = array($table_name_pages_viewm,$cache_ip);
+	$page_view = $wpdb->get_row( $sql, $params );
+//没查到，
+	$enter_time = $page_view->enter_time;
+	$leave_time = $page_view->leave_time;
 
-	$cache_ip = $row['cache_ip'];
-	$enter_time = $row['enter_time'];
-	$leave_time = $row['leave_time'];
-
-    //暂认为无离开时间就是对的。
-    if($cache_ip[0]!=null && $leave_time[0]==null){
+    //暂认为无离开时间就是对的。TODO 更新如何限行？
+    if($leave_time==null){
         $current_time = current_time('Y-m-d H:i:s');
         $view_time = computeViewTime($enter_time,$current_time);
         $wpdb->update($table_name_pages_view, array(

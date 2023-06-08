@@ -4,7 +4,7 @@ $k_cache_ip;
 $config=array('address'=>'127.0.0.1',
   'port'=>'8088',
   'event'=>'WSevent', //回调函数的函数名
-  'log'=>false,
+  'log'=>true,
 );
 $websocket=new websocket($config);
 $websocket->run();
@@ -64,14 +64,15 @@ function updateLeaveTime($k,$k_cache_ip){
     }
 
     // 定义 SQL 查询语句 
-$sql = 'SELECT `enter_time` FROM `wp_jungle_statistics_pages_view` where cache_ip = ? order by id desc limit 1';  
+$sql = 'SELECT `enter_time` FROM `wp_jungle_statistics_pages_view` where cache_ip = ? and current_page = ? order by id desc limit 1';  
   
 // 创建预处理语句对象  
 $stmt = $conn->prepare($sql);  
   
 // 绑定参数  
     $websocket->log('out,cache_ip:'.$cache_ip);
-$stmt->bind_param('s', $cache_ip);  
+    $websocket->log('out,cache_ip:'.$page);
+$stmt->bind_param('ss', $cache_ip,$page);  
   
 // 执行查询  
 $stmt->execute();  
