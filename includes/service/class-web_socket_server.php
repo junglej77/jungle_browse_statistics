@@ -64,7 +64,7 @@ function updateLeaveTime($k,$k_cache_ip){
     }
 
     // 定义 SQL 查询语句 
-$sql = 'SELECT `enter_time` FROM `wp_jungle_statistics_pages_view` where cache_ip = ? limit 1';  
+$sql = 'SELECT `enter_time` FROM `wp_jungle_statistics_pages_view` where cache_ip = ? order by id desc limit 1';  
   
 // 创建预处理语句对象  
 $stmt = $conn->prepare($sql);  
