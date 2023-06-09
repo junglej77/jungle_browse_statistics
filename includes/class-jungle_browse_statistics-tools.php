@@ -140,12 +140,9 @@ class JungleBrowseStatisticsTools
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
 
-		// 检查数据表是否有数据
-		if ($wpdb->get_var("SELECT COUNT(*) FROM $table_name") > 0) {
-			// 如果有数据，则进行更新操作
-			delete_old_records();
-			// ... 执行更新操作
-		}
+		delete_old_records();
+		// 更新在线人数到option
+		update_option("jungle_browse_statistics_online_count",$wpdb->get_var("SELECT COUNT(1) FROM $table_name"));
 	}
 	public function delete_old_records()
 	{

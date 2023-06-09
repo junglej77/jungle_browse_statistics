@@ -95,7 +95,7 @@ function user_cache()
         'enter_time' => current_time('Y-m-d H:i:s'),
     );
     //先把该cache_ip最后一次的访问记录离开时间更新了
-    update_leave_time($cache_ip);
+    update_leave_time($cache_ip,$table_name_pages_view);
     $wpdb->insert($table_name_pages_view, $page_viewed);
     $echo = array(
         'device' => $device,
@@ -108,39 +108,25 @@ function user_cache()
         'page_url' => $page_url,
         'referrer' => $referrer,
     );
-    /**************************************************************************************启动数据表五分钟一更新（*******没成功， 只能页面刷新一次启动一次*******）*/
-    //检查是否已经开启了定时任务
-            $jungle_browse_statistics_online_count_cron_flag = wp_next_scheduled( 'jungle_browse_statistics_online_count_cron_hook' );
-    //未开启就开启
-    if(!$jungle_browse_statistics_online_count_cron_flag){
-        //首先创建时间间隔  TODO 能进入这里
-        add_filter( 'cron_schedules', 'jungle_browse_statistics_online_count_cron_interval' );
-        add_action( 'jungle_browse_statistics_online_count_cron_hook', 'jungle_browse_statistics_online_count_cron_exec' );
-        //立刻执行，随后每300秒执行一次
-        wp_schedule_event( time(), 'three_hundred_seconds', 'jungle_browse_statistics_online_count_cron_hook' );
-    }
     // 最后返回结果
     wp_send_json_success($echo);
 }
 
-function jungle_browse_statistics_cron_interval( $schedules ) {
-    $schedules['daily'] = array(
-        'interval' => DAY_IN_SECONDS,
-        'display'  => esc_html__( 'Once Daily' ), );
-    return $schedules;
-}
 /**
  * 更新访客页面离开页面时间,
  */
-function update_leave_time($ip){
+function update_leave_time($ip,$table_name){
     //先判断访客最近一次的时间距离这次请求的时间
-    //TODO 这里通过wpdb获取当前数据库的信息。
     $conn = new mysqli("localhost", "yousentest", "siYaojing.748", "www_yousentest_com");
+    //TODO 这里通过wpdb获取当前数据库的信息。
+    // global $wpdb;
+    // $conn = new mysqli($wpdb->db_host(), $wpdb->db_user(), $wpdb->db_password(), "www_yousentest_com");
     // // Check connection
     if ($conn->connect_error) {
         die("连接失败: " . $conn->connect_error);
     }
-    $sql = "SELECT enter_time,leave_time FROM wp_jungle_statistics_pages_view WHERE cache_ip = ? ORDER BY id DESC LIMIT 1";  
+    $sql = "SELECT enter_time,leave_time FROM ".$table_name." WHERE cache_ip = ? ORDER BY id DESC LIMIT 1";  
+    echo $sql;
     $stmt = $conn->prepare($sql);  
     $stmt->bind_param('s',$ip);  
     $stmt->execute();  
@@ -155,7 +141,7 @@ function update_leave_time($ip){
     if($leave_time==null){    
         $current_time = strftime('%Y-%m-%d %H:%M:%S', time());
         $view_time = computeViewTime($enter_time,$current_time);
-        $sql = "UPDATE wp_jungle_statistics_pages_view SET leave_time= ? , view_time = ?  WHERE cache_ip= ?   order by id desc limit 1 ";  
+        $sql = "UPDATE ".$table_name." SET leave_time= ? , view_time = ?  WHERE cache_ip= ?   order by id desc limit 1 ";  
         $stmt = $conn->prepare($sql);  
         $stmt->bind_param('sis', $current_time,$view_time,$ip);  
         $stmt->execute();  
@@ -170,29 +156,6 @@ function computeViewTime($enter_time,$current_time){
     $startTime = strtotime($enter_time);
     $endTime = strtotime($current_time);
     return $endTime - $startTime;
-}
-
-function jungle_browse_statistics_online_count_cron_interval( $schedules ) {
-    $schedules['three_hundred_seconds'] = array(
-        'interval' => 300,
-        'display'  => esc_html__( 'Every 300 Seconds' ), );
-    return $schedules;
-}
-
-/**
- * 统计在线人数定时任务执行器
- */
-function jungle_browse_statistics_online_count_cron_exec(){
-    //TODO不能进入这里
-    update_option("jungle_browse_statistics_online_count",2);
-    //先统计有多少在线人数，为0就停止
-    $online_count=JungleBrowseStatisticsTools::look_online_visitor_count();
-    if($online_count==0){
-        $timestamp = wp_next_scheduled( 'jungle_browse_statistics_online_count_cron_hook' );
-        wp_unschedule_event( $timestamp, 'jungle_browse_statistics_online_count_cron_hook' );
-    }
-    //更新在线人数到option
-    // update_option("jungle_browse_statistics_online_count",$online_count);
 }
 
 // // 注册 Ajax 动作
