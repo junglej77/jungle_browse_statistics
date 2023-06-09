@@ -83,12 +83,15 @@ require plugin_dir_path(__FILE__) . 'includes/service/user_service.php';
 // }
 
 // require plugin_dir_path(__FILE__) . 'includes/class-jungle_browse_statistics-tools.php';
+
+
+add_filter( 'cron_schedules', 'jungle_browse_statistics_online_count_cron_interval' );
 register_activation_hook(__FILE__, 'jungle_browse_statistics_online_count_activation');
 
 function jungle_browse_statistics_online_count_activation() {
-	
+
 	if (! wp_next_scheduled ( 'jungle_browse_statistics_online_count_cron_hook' )) {
-		wp_schedule_event(time(), 'hourly', 'jungle_browse_statistics_online_count_cron_hook');
+		wp_schedule_event(time(), '5_minutes', 'jungle_browse_statistics_online_count_cron_hook');
 	}
 
 }
@@ -97,18 +100,16 @@ add_action( 'jungle_browse_statistics_online_count_cron_hook', 'jungle_browse_st
  * 统计在线人数定时任务执行器
  */
 function jungle_browse_statistics_online_count_cron_exec(){
-	// $tool = new JungleBrowseStatisticsTools();
-	// $tool->look_online_visitor_count();
-	// $tool->delete_old_records();
+	JungleBrowseStatisticsTools::delete_old_records();
+	JungleBrowseStatisticsTools::look_online_visitor_count();
 }
 
-    // add_filter( 'cron_schedules', 'jungle_browse_statistics_online_count_cron_interval' );
-    // function example_add_cron_interval( $schedules ) { 
-    //     $schedules['five_seconds'] = array(
-    //         'interval' => 5,
-    //         'display'  => esc_html__( 'Every Five Seconds' ), );
-    //     return $schedules;
-    // }
+function jungle_browse_statistics_online_count_cron_interval( $schedules ) { 
+	$schedules['5_minutes'] = array(
+		'interval' => 300,
+		'display'  => esc_html__( 'Every 30 Seconds' ), );
+	return $schedules;
+}
 
 register_deactivation_hook(__FILE__, 'jungle_browse_statistics_online_count_deactivation');
 

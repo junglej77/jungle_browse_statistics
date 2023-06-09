@@ -136,23 +136,18 @@ class JungleBrowseStatisticsTools
 	}
 	// 启动一个定时任务，检查在线访客有多少
 	public static function look_online_visitor_count()
-	{
+	{//TODO 能进行到这里，但是没有执行后续流程
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
-
-		delete_old_records();
-		// 更新在线人数到option
-		update_option("jungle_browse_statistics_online_count",$wpdb->get_var("SELECT COUNT(1) FROM $table_name"));
+		$count =$wpdb->get_var("SELECT COUNT(1) FROM $table_name");
+		update_option("jungle_browse_statistics_online_count",$count);
 	}
-	public function delete_old_records()
+	public static function delete_old_records()
 	{
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
 		// 删除 now_time 和当前时间相差超过300秒的记录
-		$wpdb->query("
-		DELETE FROM $table_name
-		WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(now_time) > 15
-			");
+		$wpdb->query("DELETE FROM $table_name WHERE (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(now_time)) > 300 ");
 	}
 }
 

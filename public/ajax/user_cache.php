@@ -139,11 +139,14 @@ function update_leave_time($ip,$table_name){
         $leave_time =  $row["leave_time"];
     }
     if($leave_time==null){    
-        $current_time = strftime('%Y-%m-%d %H:%M:%S', time());
-        $view_time = computeViewTime($enter_time,$current_time);
+        $now=current_time('Y-m-d H:i:s');
+        $current_time = strftime('%Y-%m-%d %H:%M:%S', $now);;
+  
+        // 格式化本地时区时间  
+        $view_time = computeViewTime($enter_time,$now);
         $sql = "UPDATE ".$table_name." SET leave_time= ? , view_time = ?  WHERE cache_ip= ?   order by id desc limit 1 ";  
         $stmt = $conn->prepare($sql);  
-        $stmt->bind_param('sis', $current_time,$view_time,$ip);  
+        $stmt->bind_param('sis', current_time('Y-m-d H:i:s'),$view_time,$ip);  
         $stmt->execute();  
     }   
     $conn->close();
