@@ -2,10 +2,11 @@ import utils from "./utils";
 (function ($) {
     'use strict';
     var ws = new WebSocket('ws://127.0.0.1:8088');
+    let ipInfo = jungle_browse_statistics
 
     ws.onopen = () => {
         // 连接成功后发送消息给前端
-        ws.send(utils.getCookie('cache_ip'));
+        ws.send(utils.getCookie('cache_ip') + '~' + ipInfo.page_url);
     };
 
     ws.onclose = (event) => {
@@ -21,7 +22,6 @@ import utils from "./utils";
     };
     // ws.initWebSocket()
     // 记录访客的所有浏览信息
-    let ipInfo = jungle_browse_statistics
     // 发送Ajax请求到服务器端
     $.post(ipInfo.ajax_url, {
         action: 'user_cache',

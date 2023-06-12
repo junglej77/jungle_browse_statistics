@@ -89,7 +89,7 @@ class JungleBrowseStatisticsTools
 	// 在这里生成一个唯一的缓存值（ip+当前时间戳）
 	public static function generate_cache_ip($ip)
 	{
-		return time() . '#' . $ip;
+		return time() . '-' . $ip;
 	}
 	// 判断访客是否是新访客，24小时之后再次访问就算老访客
 	public static function is_new_visitor($wpdb, $table_name, $cache_ip)
@@ -136,26 +136,18 @@ class JungleBrowseStatisticsTools
 	}
 	// 启动一个定时任务，检查在线访客有多少
 	public static function look_online_visitor_count()
+	{//TODO 能进行到这里，但是没有执行后续流程
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
+		$count =$wpdb->get_var("SELECT COUNT(1) FROM $table_name");
+		update_option("jungle_browse_statistics_online_count",$count);
+	}
+	public static function delete_old_records()
 	{
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
-
-		// 检查数据表是否有数据
-		if ($wpdb->get_var("SELECT COUNT(*) FROM $table_name") > 0) {
-			// 如果有数据，则进行更新操作
-			delete_old_records();
-			// ... 执行更新操作
-		}
+		// 删除 now_time 和当前时间相差超过300秒的记录
+		$wpdb->query("DELETE FROM $table_name WHERE (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(now_time)) > 300 ");
 	}
 }
 
-function delete_old_records()
-{
-	global $wpdb;
-	$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
-	// 删除 now_time 和当前时间相差超过300秒的记录
-	$wpdb->query("
-	DELETE FROM $table_name
-    WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(now_time) > 15
-		");
-}
