@@ -57,6 +57,8 @@ class Jungle_browse_statistics
 		$plugin_admin = new Jungle_browse_statistics_Admin($this->get_plugin_name(), $this->get_version());
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
+		$this->loader->add_action('admin_menu', $plugin_admin, 'add_plugin_admin_menu'); // 注册菜单
+		$this->loader->add_action('admin_menu', $plugin_admin, 'add_plugin_admin_submenu'); // 注册子菜单
 	}
 	private function define_public_hooks()
 	{
