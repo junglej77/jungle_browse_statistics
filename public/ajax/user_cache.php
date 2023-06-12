@@ -95,7 +95,7 @@ function user_cache()
         'enter_time' => current_time('Y-m-d H:i:s'),
     );
     //先把该cache_ip最后一次的访问记录离开时间更新了
-    update_leave_time($cache_ip,$table_name_pages_view);
+    update_leave_time($cache_ip, $table_name_pages_view);
     $wpdb->insert($table_name_pages_view, $page_viewed);
     $echo = array(
         'device' => $device,
@@ -115,9 +115,11 @@ function user_cache()
 /**
  * 更新访客页面离开页面时间,
  */
-function update_leave_time($ip,$table_name){
+function update_leave_time($ip, $table_name)
+{
     //先判断访客最近一次的时间距离这次请求的时间
-    $conn = new mysqli("localhost", "yousentest", "siYaojing.748", "www_yousentest_com");
+    // $conn = new mysqli("localhost", "yousentest", "siYaojing.748", "www_yousentest_com");
+    $conn = new mysqli("localhost", "www_grdtest_com", "jW4QmYmmDs", "www_grdtest_com");
     //TODO 这里通过wpdb获取当前数据库的信息。
     // global $wpdb;
     // $conn = new mysqli($wpdb->db_host(), $wpdb->db_user(), $wpdb->db_password(), "www_yousentest_com");
@@ -125,12 +127,12 @@ function update_leave_time($ip,$table_name){
     if ($conn->connect_error) {
         die("连接失败: " . $conn->connect_error);
     }
-    $sql = "SELECT enter_time,leave_time FROM ".$table_name." WHERE cache_ip = ? ORDER BY id DESC LIMIT 1";  
+    $sql = "SELECT enter_time,leave_time FROM " . $table_name . " WHERE cache_ip = ? ORDER BY id DESC LIMIT 1";
     echo $sql;
-    $stmt = $conn->prepare($sql);  
-    $stmt->bind_param('s',$ip);  
-    $stmt->execute();  
-    $result = $stmt->get_result(); 
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $ip);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $enter_time;
     $leave_time;
     if ($result->num_rows > 0) {
@@ -138,24 +140,25 @@ function update_leave_time($ip,$table_name){
         $enter_time =  $row["enter_time"];
         $leave_time =  $row["leave_time"];
     }
-    if($leave_time==null){    
-        $now=current_time('Y-m-d H:i:s');
+    if ($leave_time == null) {
+        $now = current_time('Y-m-d H:i:s');
         $current_time = strftime('%Y-%m-%d %H:%M:%S', $now);;
-  
-        // 格式化本地时区时间  
-        $view_time = computeViewTime($enter_time,$now);
-        $sql = "UPDATE ".$table_name." SET leave_time= ? , view_time = ?  WHERE cache_ip= ?   order by id desc limit 1 ";  
-        $stmt = $conn->prepare($sql);  
-        $stmt->bind_param('sis', current_time('Y-m-d H:i:s'),$view_time,$ip);  
-        $stmt->execute();  
-    }   
+
+        // 格式化本地时区时间
+        $view_time = computeViewTime($enter_time, $now);
+        $sql = "UPDATE " . $table_name . " SET leave_time= ? , view_time = ?  WHERE cache_ip= ?   order by id desc limit 1 ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('sis', current_time('Y-m-d H:i:s'), $view_time, $ip);
+        $stmt->execute();
+    }
     $conn->close();
 }
 
 /**
  * 计算页面访问时间
  */
-function computeViewTime($enter_time,$current_time){
+function computeViewTime($enter_time, $current_time)
+{
     $startTime = strtotime($enter_time);
     $endTime = strtotime($current_time);
     return $endTime - $startTime;

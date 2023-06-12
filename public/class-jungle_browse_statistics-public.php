@@ -15,8 +15,8 @@ class Jungle_browse_statistics_Public
 
 	public function enqueue_scripts()
 	{
-		wp_enqueue_script('jquery', plugin_dir_url(__FILE__) . 'js/jquery.js',  array(), $this->version, true);
-		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/jungle_browse_statistics-public.js',  array('jquery'), $this->version, true);
+		wp_enqueue_script('jquery', plugin_dir_url(__FILE__) . 'js/jquery.js',  array(), true);
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/jungle_browse_statistics-public.js',  array(), $this->version, true);
 		// 获取当前页面路径
 		$current_page_uri = $_SERVER['REQUEST_URI'];
 		// 把IP和位置信息传给JavaScript

@@ -6,7 +6,7 @@ import utils from "./utils";
 
     ws.onopen = () => {
         // 连接成功后发送消息给前端
-        ws.send(utils.getCookie('cache_ip')+'~'+ipInfo.page_url);
+        ws.send(utils.getCookie('cache_ip') + '-' + ipInfo.page_url);
     };
 
     ws.onclose = (event) => {

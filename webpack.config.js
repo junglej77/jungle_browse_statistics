@@ -8,6 +8,7 @@ const glob = require('glob');
 let jsEntries = {
     'public/js/jungle_browse_statistics-public': './src/public/js/jungle_browse_statistics-public.js',
     'admin/js/jungle_browse_statistics-admin': './src/admin/js/jungle_browse_statistics-admin.js',
+    'admin/js/seogtp_statistics_overview': './src/admin/js/seogtp_statistics_overview.js',
 };
 
 // CSS 入口配置
