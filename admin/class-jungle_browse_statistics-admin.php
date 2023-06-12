@@ -17,35 +17,19 @@ class Jungle_browse_statistics_Admin
 	public function enqueue_scripts()
 	{
 
-		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/jungle_browse_statistics-admin.js', array('jquery'), $this->version, false);
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/jungle_browse_statistics-admin.js', array('jquery'), $this->version, true);
 		global $pagenow;
 		if (
 			$pagenow == 'admin.php'
 		) {
-			// 加载 Vue.js 库
-			// wp_enqueue_script('vue', 'https://cdn.jsdelivr.net/npm/vue/dist/vue.js', array(), '2.6.12',);
-			wp_enqueue_script('vue', 'https://unpkg.com/vue@next');
 
-			// 加载 ElementUI 的 CSS 样式文件
-			// wp_enqueue_style('element-ui', 'https://unpkg.com/element-ui/lib/theme-chalk/index.css');
-			wp_enqueue_style('elementPlus', 'https://unpkg.com/element-plus@latest/theme-chalk/index.css');
+			if (isset($_GET['page'])) {
 
-
-
-			// 引入图标库
-			wp_enqueue_script('elementPlusIcons', 'https://unpkg.com/@element-plus/icons-vue', array('vue'),);
-
-			// 加载 ElementUI 的 JavaScript 文件
-			// wp_enqueue_script('element-ui', 'https://unpkg.com/element-ui/lib/index.js', array('vue'), '2.15.1',);
-			wp_enqueue_script('elementPlus', 'https://unpkg.com/element-plus@latest', array('vue'),);
-
-			wp_enqueue_script('Sortable', 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.8.3/Sortable.min.js', array(), '',);
-
-			//引入axios 请求
-			wp_enqueue_script('axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array(), '',);
-
-			//引入自定义后台样式表
-			wp_enqueue_style('admin-ui', get_stylesheet_directory_uri() . '/assets/css/admin-ui.css', array(), wp_get_theme()->get('Version'), 'all');
+				$cuurent_menu =  $_GET['page'];
+				if ($cuurent_menu == 'seogtp_statistics') {
+					wp_enqueue_script('seogtp_statistics_overview', plugin_dir_url(__FILE__) . 'js/seogtp_statistics_overview.js', array(), $this->version, true);
+				}
+			}
 		}
 	}
 	public function add_plugin_admin_menu() // 主菜单
