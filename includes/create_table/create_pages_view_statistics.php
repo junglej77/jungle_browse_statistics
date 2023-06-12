@@ -8,9 +8,10 @@ if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
 
     $sql = "CREATE TABLE $table_name (
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
-                cache_ip TEXT NOT NULL,
+                cache_ip VARCHAR(100) NOT NULL,
                 view_page VARCHAR(200) NOT NULL,
-                view_time int(0) NULL DEFAULT NULL,
+                view_time VARCHAR(10) NOT NULL,
+                create_time TIMESTAMP NULL,
                 PRIMARY KEY id (id)
             ) $charset_collate;";
 

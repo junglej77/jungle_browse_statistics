@@ -117,6 +117,30 @@ function jungle_browse_statistics_online_count_deactivation() {
  wp_clear_scheduled_hook('jungle_browse_statistics_online_count_cron_hook');
 }
 
+
+register_activation_hook(__FILE__, 'jungle_browse_statistics_cron_activation');
+
+function jungle_browse_statistics_cron_activation() {
+
+	if (! wp_next_scheduled ( 'jungle_browse_statistics_cron_hook' )) {
+        $next_midnight = strtotime( 'tomorrow midnight' );
+		wp_schedule_event( $next_midnight , 'daily', 'jungle_browse_statistics_cron_hook');
+	}
+
+}
+add_action( 'jungle_browse_statistics_cron_hook', 'jungle_browse_statistics_cron_exec' );
+
+
+register_deactivation_hook(__FILE__, 'jungle_browse_statistics_cron_deactivation');
+
+function jungle_browse_statistics_cron_deactivation() {
+ wp_clear_scheduled_hook('jungle_browse_statistics_cron_hook');
+}
+
+function jungle_browse_statistics_cron_exec(){
+	JungleBrowseStatisticsTools::dailyStatistics();
+}
+
 /**
  * 开始执行该插件。
  *
