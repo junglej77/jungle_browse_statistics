@@ -5,7 +5,7 @@ import utils from "./utils";
 
     ws.onopen = () => {
         // 连接成功后发送消息给前端
-        ws.send('WebSocket连接已成功建立');
+        ws.send(utils.getCookie('cache_ip'));
     };
 
     ws.onclose = (event) => {
