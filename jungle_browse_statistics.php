@@ -73,7 +73,7 @@ register_deactivation_hook(__FILE__, 'deactivate_jungle_browse_statistics');
 require plugin_dir_path(__FILE__) . 'includes/class-jungle_browse_statistics.php';
 
 //引入类
-require plugin_dir_path(__FILE__) . 'includes/service/user_service.php';
+require plugin_dir_path(__FILE__) . 'includes/service/class-jungle_browse_statistics_user_service.php';
 
 // register_activation_hook(__FILE__, 'start_websocket_server');
 // function start_websocket_server()
