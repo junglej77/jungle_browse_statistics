@@ -7,8 +7,11 @@ const glob = require('glob');
 // JavaScript 入口配置
 let jsEntries = {
     'public/js/jungle_browse_statistics-public': './src/public/js/jungle_browse_statistics-public.js',
-    'admin/js/jungle_browse_statistics-admin': './src/admin/js/jungle_browse_statistics-admin.js',
     'admin/js/seogtp_statistics_overview': './src/admin/js/seogtp_statistics_overview.js',
+    'admin/js/seogtp_statistics_visitor_analytics': './src/admin/js/seogtp_statistics_visitor_analytics.js',
+    'admin/js/seogtp_statistics_accessSource_analytics': './src/admin/js/seogtp_statistics_accessSource_analytics.js',
+    'admin/js/seogtp_statistics_pages_view_analytics': './src/admin/js/seogtp_statistics_pages_view_analytics.js',
+    'admin/js/seogtp_statistics_setup': './src/admin/js/seogtp_statistics_setup.js',
 };
 
 // CSS 入口配置

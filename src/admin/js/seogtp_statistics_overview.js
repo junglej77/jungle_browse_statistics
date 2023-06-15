@@ -13,8 +13,6 @@ import {
 import { LabelLayout, UniversalTransition } from 'echarts/features';
 // 引入 Canvas 渲染器，注意引入 CanvasRenderer 或者 SVGRenderer 是必须的一步
 import { CanvasRenderer } from 'echarts/renderers';
-
-// 注册必须的组件
 echarts.use([
 	TitleComponent,
 	TooltipComponent,
@@ -27,47 +25,553 @@ echarts.use([
 	CanvasRenderer
 ]);
 
-
-import { createApp } from './vue'
-// 新增代码：引入特定组件
-// 此时会自动引入对应的样式文件，无需再手动逐一引入
-import {
-	ElButton
-} from 'element-plus'
-
-const app = createApp({
+import { mdiCalendarMonth } from '@mdi/js';
+// 注册必须的组件
+import { ClickOutside as vClickOutside } from 'element-plus'
+const app = Vue.createApp({
 	data() {
 		return {
-			message: 'Hello Vue!',
-			options: {
-				title: {
-					text: 'ECharts 入门示例'
+			choosedTimeBtn: null,
+			choosedTime: '今天',
+			compareTimeBtn: null,
+			compareTime: '昨天',
+			mdiCalendarMonth: mdiCalendarMonth,
+			option3: {
+				color: [
+					"#ff9597",
+					"#22cfe0",
+					"#b9b1f0",
+					"#51b7fb",
+					"#76e68f",
+					"#fa8b54",
+					"#ffc545",
+				],
+				data: [
+					{
+						value: 899,
+						name: "社交媒体",
+					},
+					{
+						value: 151,
+						name: "搜索引擎",
+					},
+					{
+						value: 50,
+						name: "直接访问",
+					},
+					{
+						value: 40,
+						name: "邮件营销",
+					},
+					{
+						value: 10,
+						name: "未知",
+					},
+				]
+			},
+			option4: {
+				color: [
+					"#ff9597",
+					"#22cfe0",
+					"#b9b1f0",
+					"#51b7fb",
+					"#76e68f",
+					"#fa8b54",
+					"#ffc545",
+				],
+				data: [
+					{
+						value: 254,
+						name: "法国",
+					},
+					{
+						value: 580,
+						name: "美国",
+					},
+					{
+						value: 199,
+						name: "意大利",
+					},
+					{
+						value: 190,
+						name: "英国",
+					},
+					{
+						value: 249,
+						name: "德国",
+					},
+					{
+						value: 38,
+						name: "印度",
+					},
+
+				]
+			},
+			option5: {
+				color: [
+					"#ff9597",
+					"#22cfe0",
+					"#b9b1f0",
+					"#51b7fb",
+					"#76e68f",
+					"#fa8b54",
+					"#ffc545",
+				],
+				data: [
+					{
+						value: 254,
+						name: "手机",
+					},
+					{
+						value: 580,
+						name: "电脑",
+					},
+					{
+						value: 199,
+						name: "平板",
+					},
+				]
+			},
+			option6: {
+				color: [
+					"#ff9597",
+					"#22cfe0",
+					"#b9b1f0",
+					"#51b7fb",
+					"#76e68f",
+					"#fa8b54",
+					"#ffc545",
+				],
+				data: [
+					{
+						value: 899,
+						name: "Facebook",
+					},
+					{
+						value: 580,
+						name: "Instagram",
+					},
+					{
+						value: 477,
+						name: "Youtube",
+					},
+					{
+						value: 425,
+						name: "Tiktok",
+					},
+					{
+						value: 398,
+						name: "LinkedIn",
+					},
+					{
+						value: 254,
+						name: "Twitter",
+					},
+					{
+						value: 199,
+						name: "Pinterest",
+					},
+					{
+						value: 155,
+						name: "Tumblr",
+					},
+					{
+						value: 121,
+						name: "Quora",
+					},
+					{
+						value: 79,
+						name: "Reddit",
+					},
+				]
+			},
+			option7: [
+				{
+					page: 'com.google.android.gm',
+					value: 870
 				},
-				tooltip: {},
-				xAxis: {
-					data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+				{
+					page: 'www.dianxiaomi.com',
+					value: 750
 				},
-				yAxis: {},
-				series: [{
-					name: '销量',
-					type: 'bar',
-					data: [5, 20, 36, 10, 10, 20]
-				}]
-			}
+				{
+					page: 'https://pictogrammers.com/library/mdi/',
+					value: 471
+				},
+				{
+					page: 'https://tongji.baidu.com/main/overview/demo/overview/index?siteId=16847648',
+					value: 170
+				},
+				{
+					page: "https://www.deepl.com/translator#en/zh/We've%20delivered%20your%20parcel%20to%20a%20secure%20location%20at%20the%20delivery%20address",
+					value: 5
+				}
+			],
+			option8: [
+				{
+					page: '/',
+					value: 1270
+				},
+				{
+					page: '/about-weller',
+					value: 970
+				},
+				{
+					page: '/contact',
+					value: 370
+				},
+				{
+					page: '/wellerpcb_news',
+					value: 72
+				}
+			]
 		}
 	},
 	mounted() {
-		var myChart = echarts.init(document.getElementById('main'));
-		myChart.setOption(this.options);
+		this.choosedTimeBtn = this.$refs.choosedTime
+		this.compareTimeBtn = this.$refs.compareTime
+		this.lineEchart(document.getElementById('line1'))
+		this.barEchart1(document.getElementById('line2'))
+		this.pieEchart(document.getElementById('line3'), this.option3)
+		this.pieEchart(document.getElementById('line4'), this.option4)
+		this.pieEchart(document.getElementById('line5'), this.option5)
+		this.pieEchart(document.getElementById('line6'), this.option6)
 	},
 	methods: {
+		cancelPopover() {
+			this.$refs.choosedTimePopover.hide();
+			this.$refs.compareTimePopover.hide();
+		},
+		barEchart1(el) {
+			let dataNews = [];
+			let dataOlds = [];
+			let xData = (function () {
+				var data = [];
+				for (var i = 0; i < 24; i++) {
+					data.push(i + '时');
+					let x1 = Math.ceil(Math.random() * 1000);
+					let x2 = Math.ceil(Math.random() * 1000);
+					dataNews.push(x1);
+					dataOlds.push(x2);
+				}
+				return data;
+			})();
+			let option = {
+				tooltip: {
+					trigger: "axis",
+					axisPointer: {
+						type: "shadow",
+						textStyle: {
+							color: "#fff",
+						},
+					},
+				},
+				grid: {
+					top: 30,
+					right: 0,
+					bottom: 20,
+				},
+				legend: {
+					right: 0,
+					textStyle: {
+						color: "#90979c",
+					},
+					data: ["老访客", "新访客"],
+				},
+				calculable: true,
+				xAxis: [
+					{
+						type: "category",
+						axisLine: {
+							lineStyle: {
+								color: "#90979c",
+							},
+						},
+						splitLine: {
+							show: false,
+						},
+						axisTick: {
+							show: false,
+						},
+						splitArea: {
+							show: false,
+						},
+						axisLabel: {
+							interval: 'auto',
+						},
+						minorTick: {
+							show: true,
+						},
+						data: xData,
+					},
+				],
+				yAxis: [
+					{
+						type: "value",
+						splitLine: {
+							show: false,
+						},
+						axisLine: {
+							lineStyle: {
+								color: "#90979c",
+							},
+						},
+						axisTick: {
+							show: false,
+						},
+						axisLabel: {
+							interval: 0,
+						},
+						splitArea: {
+							show: false,
+						},
+					},
+				],
+				series: [
+					{
+						name: "老访客",
+						type: "bar",
+						stack: "总量",
+						itemStyle: {
+							normal: {
+								color: "rgba(255,144,128,1)",
+								label: {
+									show: true,
+									textStyle: {
+										color: "#fff",
+									},
+									position: "inside",
+									formatter: function (p) {
+										return p.value > 0 ? p.value : "";
+									},
+								},
+							},
+						},
+						data: dataOlds,
+					},
+
+					{
+						name: "新访客",
+						type: "bar",
+						stack: "总量",
+						itemStyle: {
+							normal: {
+								color: "rgba(0,191,183,1)",
+								barBorderRadius: 0,
+								label: {
+									show: true,
+									position: "inside",
+									formatter: function (p) {
+										return p.value > 0 ? p.value : "";
+									},
+								},
+							},
+						},
+						data: dataNews,
+					},
+				],
+			};
+
+			var myChart = echarts.init(el);
+			myChart.setOption(option);
+		},
+		lineEchart(el) {
+			let dataNews = [];
+			let dataOlds = [];
+			let xData = (function () {
+				var data = [];
+				for (var i = 0; i < 24; i++) {
+					data.push(i + "时");
+					let x1 = Math.ceil(Math.random() * 1000);
+					let x2 = Math.ceil(Math.random() * 1000);
+					dataNews.push(x1 + (i == 0 ? 0 : dataNews[i - 1]));
+					dataOlds.push(x2 + (i == 0 ? 0 : dataOlds[i - 1]));
+				}
+				return data;
+			})();
+			let option = {
+				grid: {
+					top: 30,
+					right: 0,
+					bottom: 20,
+				},
+				tooltip: {
+					trigger: "axis",
+					axisPointer: {
+						lineStyle: {
+							color: "#ddd",
+						},
+					},
+					backgroundColor: "rgba(255,255,255,1)",
+					padding: [5, 10],
+					textStyle: {
+						color: "#7588E4",
+					},
+					extraCssText: "box-shadow: 0 0 5px rgba(0,0,0,0.3)",
+				},
+				legend: {
+					right: 0,
+					data: ["今天", "2023.06.11 - 2023.06.15"],
+				},
+				xAxis: {
+					type: "category",
+					data: xData,
+					boundaryGap: false,
+					splitLine: {
+						show: true,
+						interval: "auto",
+						lineStyle: {
+							color: ["#D4DFF5"],
+						},
+					},
+				},
+				yAxis: {
+					type: "value",
+					splitLine: {
+						lineStyle: {
+							color: ["#D4DFF5"],
+						},
+					},
+				},
+				series: [
+					{
+						name: "今天",
+						type: "line",
+						smooth: true,
+						showSymbol: false,
+						symbol: "circle",
+						symbolSize: 6,
+						data: dataNews,
+						areaStyle: {
+							normal: {
+								color: new echarts.graphic.LinearGradient(
+									0,
+									0,
+									0,
+									1,
+									[
+										{
+											offset: 0,
+											color: "rgba(199, 237, 250,0.5)",
+										},
+										{
+											offset: 1,
+											color: "rgba(199, 237, 250,0.2)",
+										},
+									],
+									false
+								),
+							},
+						},
+						itemStyle: {
+							normal: {
+								color: "#f7b851",
+							},
+						},
+						lineStyle: {
+							normal: {
+								width: 2,
+							},
+						},
+					},
+					{
+						name: "2023.06.11 - 2023.06.15",
+						type: "line",
+						smooth: true,
+						showSymbol: false,
+						symbol: "circle",
+						symbolSize: 6,
+						data: dataOlds,
+						areaStyle: {
+							normal: {
+								color: new echarts.graphic.LinearGradient(
+									0,
+									0,
+									0,
+									1,
+									[
+										{
+											offset: 0,
+											color: "rgba(216, 244, 247,1)",
+										},
+										{
+											offset: 1,
+											color: "rgba(216, 244, 247,1)",
+										},
+									],
+									false
+								),
+							},
+						},
+						itemStyle: {
+							normal: {
+								color: "#58c8da",
+							},
+						},
+						lineStyle: {
+							normal: {
+								width: 2,
+							},
+						},
+					},
+				],
+			};
+
+
+			var myChart = echarts.init(el);
+			myChart.setOption(option);
+		},
+		pieEchart(el, params) {
+			const { color, data } = params
+			let option = {
+				color: color,
+				tooltip: {
+					trigger: "item",
+					formatter: '{a} <br/>{b} : {c} ({d}%)'
+				},
+				legend: {
+					bottom: 0,
+					icon: "circle", //圆角矩形
+					itemGap: 20,
+					itemWidth: 16,
+					itemHeight: 12,
+					textStyle: {
+						fontSize: 12,
+					},
+				},
+				series: [
+					{
+						name: "项目",
+						type: "pie",
+						roseType: "radius",
+						top: '-30%',
+						center: ["50%", "50%"],
+						radius: ["10%", "60%"],
+						label: {
+							show: true,
+							position: "outside",
+							formatter: "{d}%",
+							fontSize: 14,
+						},
+						data: data,
+						emphasis: {
+							itemStyle: {
+								shadowBlur: 10,
+								shadowOffsetX: 0,
+								shadowColor: "rgba(0, 0, 0, 0.5)",
+							},
+						},
+					},
+				],
+			};
+
+			var myChart = echarts.init(el);
+			myChart.setOption(option);
+
+		}
 	}
 })
-// 新增代码：注册特定组件
-app.component(ElButton.name, ElButton)
-app.mount('#seogtp_statistics_overview')
+app.directive('click-outside', vClickOutside)
 
-// 基于准备好的dom，初始化echarts实例
-// 绘制图表
-
-
+app.use(ElementPlus);
+app.mount("#seogtp_statistics_overview");
