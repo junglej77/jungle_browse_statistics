@@ -13,6 +13,7 @@ class Jungle_browse_statistics_Activator
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/create_table/create_pages_view_statistics.php';
 		//创建当前页面在线人数数据option
 		add_option("jungle_browse_statistics_online_count",0);
+		add_option("jungle_browse_statistics_test",0);
 
 	}
 

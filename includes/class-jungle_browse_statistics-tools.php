@@ -134,7 +134,10 @@ class JungleBrowseStatisticsTools
 		$results = $wpdb->get_results($query);
 		return empty($results[0]);
 	}
-	// 启动一个定时任务，检查在线访客有多少
+
+	/**
+	 * 启动一个定时任务，检查在线访客有多少
+	 *  */ 
 	public static function look_online_visitor_count()
 	{//TODO 能进行到这里，但是没有执行后续流程
 		global $wpdb;
@@ -142,12 +145,66 @@ class JungleBrowseStatisticsTools
 		$count =$wpdb->get_var("SELECT COUNT(1) FROM $table_name");
 		update_option("jungle_browse_statistics_online_count",$count);
 	}
+
+	/**
+	 * 定期删除未在线用户
+	 */
 	public static function delete_old_records()
 	{
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
 		// 删除 now_time 和当前时间相差超过300秒的记录
 		$wpdb->query("DELETE FROM $table_name WHERE (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(now_time)) > 300 ");
+	}
+
+	/**
+	 * 统计过去一天各访客页面访问时长
+	 */
+	public static function dailyStatistics()
+	{
+		global $wpdb;
+		$table_name_pages_view = $wpdb->prefix . 'jungle_statistics_pages_view';
+		$table_name_pages_view_statistics = $wpdb->prefix . 'jungle_statistics_pages_view_statistics';
+		$endTime = current_time('Y-m-d H:i:s');
+		$startTime = date('Y-m-d H:i:s', strtotime('-24 hours', strtotime($endTime)));
+		
+		$today = date('Y-m-d', strtotime('today'));
+		$zeroHour = $today . ' 00:00:00';
+		$zeroHourFormatted = date('Y-m-d H:i:s', strtotime($zeroHour));
+		//直接统计访问时长viewTime，
+		$query = $wpdb->prepare(
+			"SELECT cache_ip, current_page, SUM(view_time) as view_time
+			FROM {$table_name_pages_view}
+			WHERE enter_time BETWEEN %s AND %s
+			GROUP BY cache_ip, current_page",
+			$startTime,
+			$endTime
+		);
+		// 执行查询
+		$results = $wpdb->get_results($query);
+		$targetArray = array(); // 目标数组
+
+		if ($results) {
+			// // 查询到了记录
+			foreach ($results as $row) {
+				// 处理每一行数据
+   				$ip = $row->cache_ip;
+   				$current_page = $row->current_page;
+				$view_time=$row->view_time;
+				$data = array(
+					'cache_ip' => $ip,
+					'view_page' => $current_page,
+					'view_time' =>$view_time,
+					'create_time' => $zeroHourFormatted,
+				);
+				array_push($targetArray, $data);
+			} 
+		}else {
+			// // 没有查询到记录
+		}
+	foreach ( $targetArray as $row ) {
+		$wpdb->insert( $table_name_pages_view_statistics, $row );
+	}
 	}
 }
 
