@@ -6,9 +6,8 @@
             </svg>
             {{choosedTime}}
         </el-button>
-        <el-popover ref="choosedTimePopover" :virtual-ref="choosedTimeBtn" trigger="click" placement="bottom-start">
-            <span>选择当前时间</span>
-            <el-button type="info" @click="cancelPopover">Info</el-button>
+        <el-popover ref="choosedTimePopover" :virtual-ref="choosedTimeBtn" trigger="click" placement="bottom-start" width="auto">
+            <el-calendar v-model="choosedTime" range />
         </el-popover>
 
 

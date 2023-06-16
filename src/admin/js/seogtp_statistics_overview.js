@@ -32,7 +32,7 @@ const app = Vue.createApp({
 	data() {
 		return {
 			choosedTimeBtn: null,
-			choosedTime: '今天',
+			choosedTime: new Date(),
 			compareTimeBtn: null,
 			compareTime: '昨天',
 			mdiCalendarMonth: mdiCalendarMonth,
@@ -81,12 +81,16 @@ const app = Vue.createApp({
 				],
 				data: [
 					{
+						value: 580,
+						name: "美国",
+					},
+					{
 						value: 254,
 						name: "法国",
 					},
 					{
-						value: 580,
-						name: "美国",
+						value: 249,
+						name: "德国",
 					},
 					{
 						value: 199,
@@ -95,10 +99,6 @@ const app = Vue.createApp({
 					{
 						value: 190,
 						name: "英国",
-					},
-					{
-						value: 249,
-						name: "德国",
 					},
 					{
 						value: 38,
@@ -119,12 +119,12 @@ const app = Vue.createApp({
 				],
 				data: [
 					{
-						value: 254,
-						name: "手机",
-					},
-					{
 						value: 580,
 						name: "电脑",
+					},
+					{
+						value: 254,
+						name: "手机",
 					},
 					{
 						value: 199,
@@ -144,44 +144,54 @@ const app = Vue.createApp({
 				],
 				data: [
 					{
-						value: 899,
+						value: 8939,
 						name: "Facebook",
+						ringRate: -21.5,
 					},
 					{
 						value: 580,
 						name: "Instagram",
+						ringRate: 21.5,
 					},
 					{
 						value: 477,
 						name: "Youtube",
+						ringRate: 0,
 					},
 					{
 						value: 425,
 						name: "Tiktok",
+						ringRate: -21.5,
 					},
 					{
 						value: 398,
 						name: "LinkedIn",
+						ringRate: -21.5,
 					},
 					{
 						value: 254,
 						name: "Twitter",
+						ringRate: 21.5,
 					},
 					{
 						value: 199,
 						name: "Pinterest",
+						ringRate: -21.5,
 					},
 					{
 						value: 155,
 						name: "Tumblr",
+						ringRate: -21.5,
 					},
 					{
 						value: 121,
 						name: "Quora",
+						ringRate: -21.5,
 					},
 					{
 						value: 79,
 						name: "Reddit",
+						ringRate: 21.5,
 					},
 				]
 			},
@@ -224,6 +234,24 @@ const app = Vue.createApp({
 					page: '/wellerpcb_news',
 					value: 72
 				}
+			],
+			option8: [
+				{
+					page: '/',
+					value: 20
+				},
+				{
+					page: '/about-weller',
+					value: 80
+				},
+				{
+					page: '/contact',
+					value: 500
+				},
+				{
+					page: '/wellerpcb_news',
+					value: 100
+				}
 			]
 		}
 	},
@@ -232,15 +260,192 @@ const app = Vue.createApp({
 		this.compareTimeBtn = this.$refs.compareTime
 		this.lineEchart(document.getElementById('line1'))
 		this.barEchart1(document.getElementById('line2'))
-		this.pieEchart(document.getElementById('line3'), this.option3)
-		this.pieEchart(document.getElementById('line4'), this.option4)
-		this.pieEchart(document.getElementById('line5'), this.option5)
-		this.pieEchart(document.getElementById('line6'), this.option6)
+		this.barEchart(document.getElementById('line3'), this.option3)
+		this.barEchart(document.getElementById('line4'), this.option4)
+		this.barEchart(document.getElementById('line5'), this.option5)
+		this.barEchart(document.getElementById('line6'), this.option6)
 	},
 	methods: {
 		cancelPopover() {
 			this.$refs.choosedTimePopover.hide();
 			this.$refs.compareTimePopover.hide();
+		},
+		barEchart(el, params) {
+			let dataBase = params.data;
+
+			var top10name = dataBase.map((item) => item.name);
+			var top10value = dataBase.map((item) => item.value);
+			var color = ["#0d6efd", "#0d6efd", "#0d6efd"];
+			var color1 = ["#6610f2", "#6610f2", "#6610f2"];
+
+			let lineY = [];
+			let lineT = [];
+			for (var i = 0; i < dataBase.length; i++) {
+				var x = i;
+				if (x > 1) {
+					x = 2;
+				}
+				var data = {
+					name: top10name[i],
+					color: color[x],
+					value: top10value[i],
+					barGap: "-100%",
+					itemStyle: {
+						normal: {
+							show: true,
+							borderWidth: 2,
+							color: new echarts.graphic.LinearGradient(
+								0,
+								0,
+								1,
+								0,
+								[
+									{
+										offset: 0,
+										color: color[x],
+									},
+									{
+										offset: 1,
+										color: color1[x],
+									},
+								],
+								false
+							),
+							barBorderRadius: 10,
+						},
+					},
+				};
+				var data1 = {
+					value: top10value[i],
+					barGap: "-100%",
+					itemStyle: {
+						color: "#00123500", //剩余部分颜色
+						barBorderRadius: 10,
+					},
+					label: {
+						show: true,
+						formatter: top10value[i],
+						position: "right",
+					},
+				};
+				lineY.push(data);
+				lineT.push(data1);
+			}
+
+			let option = {
+				tooltip: {
+					trigger: "item",
+					formatter: (p) => {
+						if (p.seriesName === "total") {
+							return "";
+						}
+						return `${p.name}<br/>${p.value}`;
+					},
+				},
+				grid: {
+					top: 0,
+					left: 0,
+					right: "10%",
+					bottom: 0,
+				},
+				dataZoom: [
+					{
+						type: "inside",
+						yAxisIndex: 0,
+						end: dataBase.length > 5 ? ((5 - 0.01) / dataBase.length) * 100 : 100,
+						zoomOnMouseWheel: false,
+						moveOnMouseMove: true,
+						moveOnMouseWheel: true,
+					},
+				],
+				color: color,
+				yAxis: [
+					{
+						type: "category",
+						inverse: true,
+						axisTick: {
+							show: false,
+						},
+						axisLine: {
+							show: false,
+						},
+						data: top10name,
+					},
+				],
+				xAxis: {
+					type: "value",
+					axisTick: {
+						show: false,
+					},
+					axisLine: {
+						show: false,
+					},
+					splitLine: {
+						show: false,
+					},
+					axisLabel: {
+						show: false,
+					},
+				},
+				series: [
+					{
+						name: "total",
+						type: "bar",
+						barGap: "-100%",
+						barWidth: "15px",
+						data: lineT,
+						legendHoverLink: false,
+					},
+					{
+						name: "bar",
+						type: "bar",
+						barWidth: "15px",
+						data: lineY,
+						label: {
+							normal: {
+								color: "#b3ccf8",
+								show: true,
+								position: [0, "-20px"],
+								formatter: function (a) {
+									console.log(a);
+									let num = a.dataIndex + 1;
+									let ringRate = dataBase[a.dataIndex].ringRate;
+									let str = `{color1|${num}} {color2|${a.name}}`;
+									if (ringRate) {
+										str += ` {${ringRate >= 0 ? 'color4' : 'color3'}|${ringRate >= 0 ? '↑' : '↓'} ${Math.abs(ringRate)}}`
+									}
+									return str;
+								},
+								rich: {
+									color1: {
+										color: "#000",
+										fontSize: "14",
+										fontWeight: 500,
+									},
+									color2: {
+										color: "#000",
+										fontSize: "14",
+										fontWeight: 700,
+									},
+									color3: {
+										color: "#dc3545",
+										fontSize: "12",
+										fontWeight: 700,
+									},
+									color4: {
+										color: "#198754",
+										fontSize: "12",
+										fontWeight: 700,
+									}
+								},
+							},
+						},
+					},
+				],
+			};
+
+			var myChart = echarts.init(el);
+			myChart.setOption(option);
 		},
 		barEchart1(el) {
 			let dataNews = [];
@@ -550,7 +755,14 @@ const app = Vue.createApp({
 						label: {
 							show: true,
 							position: "outside",
-							formatter: "{d}%",
+							formatter: function (params) {
+								return `${params.name} \n ${params.value} \n( {b|${params.percent}%}) `;
+							},
+							rich: {
+								b: {
+									color: 'red',
+								},
+							},
 							fontSize: 14,
 						},
 						data: data,
