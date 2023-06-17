@@ -1,21 +1,22 @@
 <div id="seogtp_statistics_overview">
     <div class="time_section_wrapper">
-        <el-button type="info" ref="choosedTime">
-            <svg style="width:24px" viewBox="0 0 24 24">
-                <path :d="mdiCalendarMonth"></path>
-            </svg>
-            {{choosedTime}}
-        </el-button>
-        <el-popover ref="choosedTimePopover" :virtual-ref="choosedTimeBtn" trigger="click" placement="bottom-start" width="auto">
-            <el-calendar v-model="choosedTime" range />
-        </el-popover>
-
-
-        <el-button type="info" ref="compareTime">对比时间：{{compareTime}}</el-button>
-        <el-popover ref="compareTimePopover" :virtual-ref="compareTimeBtn" trigger="click" placement="bottom-start">
-            <span>选择对比时间</span>
-            <el-button type="info" @click="cancelPopover">Info</el-button>
-        </el-popover>
+        <div class="compareTime_wrap time_section_wrap">
+            <el-date-picker ref="choosedTime" popper-class="choosedTime_popover" v-model="choosedTime" type="daterange" unlink-panels :shortcuts="shortcuts" @change="compareDate" :disabled-date="disabledDate"></el-date-picker>
+            <el-button @click="openDatePicker('choosedTime')">
+                <svg style="width:24px" viewBox="0 0 24 24">
+                    <path :d="mdiCalendarMonth"></path>
+                </svg>
+                {{DateFilter(choosedTime)}}
+            </el-button>
+        </div>
+        <div class="compareTime_wrap time_section_wrap">
+            <el-date-picker ref="compareTime" popper-class="compareTime_popover" v-model="compareTime" type="daterange" unlink-panels :shortcuts="shortcuts" @change="compareDate" :disabled-date="disabledDate"></el-date-picker>
+            <el-button @click="openDatePicker('compareTime')">
+                <span v-if="DateFilter(compareTime)">对比:</span>
+                <span v-else>暂无对比</span>
+                {{DateFilter(compareTime)?DateFilter(compareTime):''}}
+            </el-button>
+        </div>
     </div>
 
     <div class="database_overview">

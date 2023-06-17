@@ -24,18 +24,65 @@ echarts.use([
 	UniversalTransition,
 	CanvasRenderer
 ]);
-
 import { mdiCalendarMonth } from '@mdi/js';
 // 注册必须的组件
-import { ClickOutside as vClickOutside } from 'element-plus'
 const app = Vue.createApp({
 	data() {
 		return {
-			choosedTimeBtn: null,
-			choosedTime: new Date(),
-			compareTimeBtn: null,
-			compareTime: '昨天',
+			choosedTime: [],
+			compareTime: [],
+			shortcuts: [
+
+				{
+					text: '今天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						return [start, end]
+					},
+				},
+
+				{
+					text: '昨天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+						end.setTime(end.getTime() - 3600 * 1000 * 24 * 1)
+						return [start, end]
+					},
+				},
+				{
+					text: '过去7天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+						return [start, end]
+					},
+				},
+				{
+					text: '过去30天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+						return [start, end]
+					},
+				},
+				{
+					text: '过去90天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+						return [start, end]
+					},
+				}
+			],
 			mdiCalendarMonth: mdiCalendarMonth,
+
+
 			option3: {
 				color: [
 					"#ff9597",
@@ -256,8 +303,7 @@ const app = Vue.createApp({
 		}
 	},
 	mounted() {
-		this.choosedTimeBtn = this.$refs.choosedTime
-		this.compareTimeBtn = this.$refs.compareTime
+		this.choosedTime = [new Date(), new Date()]
 		this.lineEchart(document.getElementById('line1'))
 		this.barEchart1(document.getElementById('line2'))
 		this.barEchart(document.getElementById('line3'), this.option3)
@@ -266,10 +312,19 @@ const app = Vue.createApp({
 		this.barEchart(document.getElementById('line6'), this.option6)
 	},
 	methods: {
-		cancelPopover() {
-			this.$refs.choosedTimePopover.hide();
-			this.$refs.compareTimePopover.hide();
-		},
+		openDatePicker(DatePicker) {
+			if (DatePicker == 'choosedTime' && this.shortcuts[0].text == '无对比') {
+				this.shortcuts.splice(0, 1);
+			} else if (DatePicker == 'compareTime' && this.shortcuts[0].text != '无对比') {
+				this.shortcuts.unshift({
+					text: '无对比',
+					value: () => {
+						return ['', '']
+					},
+				},);
+			}
+			this.$refs[DatePicker].focus()
+		},//按钮打开日期选择器
 		barEchart(el, params) {
 			let dataBase = params.data;
 
@@ -407,7 +462,6 @@ const app = Vue.createApp({
 								show: true,
 								position: [0, "-20px"],
 								formatter: function (a) {
-									console.log(a);
 									let num = a.dataIndex + 1;
 									let ringRate = dataBase[a.dataIndex].ringRate;
 									let str = `{color1|${num}} {color2|${a.name}}`;
@@ -722,7 +776,6 @@ const app = Vue.createApp({
 				],
 			};
 
-
 			var myChart = echarts.init(el);
 			myChart.setOption(option);
 		},
@@ -780,10 +833,97 @@ const app = Vue.createApp({
 			var myChart = echarts.init(el);
 			myChart.setOption(option);
 
+		}, // 禁止选择今天之后的时间
+		disabledDate(time) {
+			return time.getTime() > Date.now();
+		},
+		compareDate(val) {
+			let valStr = `${this.formatDate(new Date(val[0]))} - ${this.formatDate(new Date(val[1]))}`
+			let choosedTimeStr = `${this.formatDate(new Date(this.choosedTime[0]))} - ${this.formatDate(new Date(this.choosedTime[1]))}`
+			let compareTimeStr = `${this.formatDate(new Date(this.compareTime[0]))} - ${this.formatDate(new Date(this.compareTime[1]))}`
+			console.log(valStr);
+			console.log(choosedTimeStr);
+			console.log(compareTimeStr);
+			if (choosedTimeStr == compareTimeStr) {
+				this.choosedTime[0] = val[0]
+				this.choosedTime[1] = val[1]
+				this.compareTime = []
+			}
+
+			this.lineEchart(document.getElementById('line1'))
+			this.barEchart1(document.getElementById('line2'))
+			this.barEchart(document.getElementById('line3'), this.option3)
+			this.barEchart(document.getElementById('line4'), this.option4)
+			this.barEchart(document.getElementById('line5'), this.option5)
+			this.barEchart(document.getElementById('line6'), this.option6)
+
+		}, // 时间选择之后，做出对比，并且请求相关数据渲染图标
+		DateFilter(value) {
+			if (value.length === 0) {
+				return false;
+			} else if (value[0] == 'Invalid Date') {
+				this.compareTime = []
+				return false;
+			}
+			const today = new Date();
+			today.setHours(0, 0, 0, 0); // 将时间部分设置为00:00:00
+
+			const yesterday = new Date(today);
+			yesterday.setDate(today.getDate() - 1);
+
+			const sevenDaysAgo = new Date(today);
+			sevenDaysAgo.setDate(today.getDate() - 7);
+
+			const thirtyDaysAgo = new Date(today);
+			thirtyDaysAgo.setDate(today.getDate() - 30);
+
+			const nintyDaysAgo = new Date(today);
+			nintyDaysAgo.setDate(today.getDate() - 90);
+
+
+			const firstDate = new Date(value[0]);
+			const secondDate = new Date(value[1]);
+			let str = ''
+			if (+firstDate === +secondDate) {
+				if (this.formatDate(firstDate) === this.formatDate(today)) {
+					str = '今天';
+				} else if (this.formatDate(firstDate) === this.formatDate(yesterday)) {
+					str = '昨天';
+				} else {
+					str = this.formatDate(firstDate);
+				}
+			} else {
+				if (this.formatDate(secondDate) === this.formatDate(today)) {
+					if (this.formatDate(firstDate) === this.formatDate(sevenDaysAgo)) {
+						str = '过去7天';
+					} else if (this.formatDate(firstDate) === this.formatDate(thirtyDaysAgo)) {
+						str = '过去30天';
+					} else if (this.formatDate(firstDate) === this.formatDate(nintyDaysAgo)) {
+						str = '过去90天';
+					} else {
+						str = `${this.formatDate(firstDate)} - ${this.formatDate(secondDate)}`;
+					}
+				} else {
+					str = `${this.formatDate(firstDate)} - ${this.formatDate(secondDate)}`;
+				}
+			}
+
+			return str;
+		},
+		formatDate(date) {
+			var d = new Date(date),
+				month = '' + (d.getMonth() + 1),
+				day = '' + d.getDate(),
+				year = d.getFullYear();
+
+			if (month.length < 2)
+				month = '0' + month;
+			if (day.length < 2)
+				day = '0' + day;
+
+			return [year, month, day].join('.');
 		}
 	}
 })
-app.directive('click-outside', vClickOutside)
-
 app.use(ElementPlus);
 app.mount("#seogtp_statistics_overview");
