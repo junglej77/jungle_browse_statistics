@@ -2,7 +2,7 @@
     <div class="time_section_wrapper">
         <div class="compareTime_wrap time_section_wrap">
             <el-date-picker ref="choosedTime" popper-class="choosedTime_popover" v-model="choosedTime" type="daterange" unlink-panels :shortcuts="shortcuts" @change="value=>compareDate(value,'choosedTime')" :disabled-date="disabledDate"></el-date-picker>
-            <el-button @click="openDatePicker('choosedTime')">
+            <el-button @click="openDatePicker('choosedTime')" v-cloak>
                 <svg style="width:24px" viewBox="0 0 24 24">
                     <path :d="mdiCalendarMonth"></path>
                 </svg>
@@ -13,7 +13,7 @@
 
             <el-date-picker ref="compareTime" popper-class="compareTime_popover" v-model="compareTime" type="daterange" unlink-panels :shortcuts="shortcuts" @change="value=>compareDate(value,'compareTime')" :disabled-date="disabledDate"></el-date-picker>
 
-            <el-button @click="openDatePicker('compareTime')">
+            <el-button @click="openDatePicker('compareTime')" v-cloak>
                 <span v-if="compareTimeStr">对比:</span>
                 <span v-else>暂无对比</span>
                 {{compareTimeStr}}
@@ -26,8 +26,11 @@
             <el-col :span="12">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">{{choosedTimeStr}}访客总计</h3>
-                        <p class="dataline">
+                        <h3 class="title" v-cloak>
+                            <span v-cloak>{{choosedTimeStr}}访客总计</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
+                        <p class="dataline" v-cloak>
                             {{echart1Fun().choosedDataTotal}}
                             <span v-if="compareTimeStr" :style="{color:echart1Fun().ringRate>0?'green':'red'}">
                                 {{(echart1Fun().ringRate>0?'↑':'↓')+ echart1Fun().ringRate}}%
@@ -42,7 +45,10 @@
             <el-col :span="12">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">{{choosedTimeStr}}新旧访客占比</h3>
+                        <h3 class="title">
+                            <span>{{choosedTimeStr}}新旧访客占比</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
                         <p class="dataline">
                             新访客：{{echart2Fun().choosedDataNewsTotal}}({{echart2Fun().choosedDataNewsTotalPercent}}%)
                             <span v-if="compareTimeStr" :style="{color:echart2Fun().choosedDataNewsTotalRingRate>0?'green':'red'}">
@@ -62,7 +68,10 @@
             <el-col :span="6">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">访问来源</h3>
+                        <h3 class="title">
+                            <span>访问来源</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
                         <p class="dataline"></p>
                     </div>
                     <div class="echart_wrap ar1-1">
@@ -73,7 +82,10 @@
             <el-col :span="6">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">地域分布</h3>
+                        <h3 class="title">
+                            <span>地域分布</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
                         <p class="dataline"></p>
                     </div>
                     <div class="echart_wrap ar1-1">
@@ -84,7 +96,10 @@
             <el-col :span="6">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">访问设备</h3>
+                        <h3 class="title">
+                            <span>访问设备</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
                         <p class="dataline"></p>
                     </div>
                     <div class="echart_wrap ar1-1">
@@ -95,7 +110,10 @@
             <el-col :span="6">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">社媒来源</h3>
+                        <h3 class="title">
+                            <span>社媒来源</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
                         <p class="dataline"></p>
                     </div>
                     <div class="echart_wrap ar1-1">
@@ -106,7 +124,10 @@
             <el-col :span="8">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">Top推荐页面</h3>
+                        <h3 class="title">
+                            <span>Top推荐页面</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
                         <p class="dataline"></p>
                     </div>
                     <div id="line7">
@@ -124,7 +145,10 @@
             <el-col :span="8">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">Top受访页面</h3>
+                        <h3 class="title">
+                            <span>Top受访页面</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
                         <p class="dataline"></p>
                     </div>
                     <div id="line8">
@@ -137,7 +161,7 @@
                             <el-table-column prop="value" label="查看次数"></el-table-column>
                             <el-table-column prop="ringRate" label="同比">
                                 <template #default="scope">
-                                    <span :style="{color: scope.row.ringRate>0?'green':'red'}">{{Math.abs(scope.row.ringRate)}}%</span>
+                                    <span :style="{color: scope.row.ringRate>0?'green':'red'}">{{scope.row.ringRate>0?'↑':'↓'}}{{Math.abs(scope.row.ringRate)}}%</span>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -147,7 +171,10 @@
             <el-col :span="8">
                 <div class="seogtp_statistics_database_card">
                     <div class="head_wrap">
-                        <h3 class="title">Top受访时长</h3>
+                        <h3 class="title">
+                            <span>Top受访时长</span>
+                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                        </h3>
                         <p class="dataline"></p>
                     </div>
                     <div id="line8">

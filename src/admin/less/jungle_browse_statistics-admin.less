@@ -12,6 +12,10 @@
     }
 }
 
+[v-cloak] {
+    display: none;
+}
+
 .choosedTime_popover {
     left: 180px !important;
 
@@ -33,6 +37,25 @@
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 4px #1f21241a, 0 1px 6px #1f21240d;
+
+    .head_wrap {
+        .title {
+            display: flex;
+            justify-content: space-between;
+
+            .view_more {
+                font-size: 12px;
+                font-weight: 500;
+                color: #9b9b9b;
+                cursor: pointer;
+                text-decoration: none;
+
+                &:hover {
+                    color: #0d6efd;
+                }
+            }
+        }
+    }
 }
 
 .echart_wrap {

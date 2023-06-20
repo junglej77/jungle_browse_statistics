@@ -1,33 +1,21 @@
-<div id="seogtp_statistics_online">
-    <el-row :gutter="20">
-        <el-col :span="6">
-            <div class="grid-content ep-bg-purple">
-                <h3>新旧访客占比</h3>
-                <div id="line1" style="width:100%;height:200px"></div>
-            </div>
-        </el-col>
-        <el-col :span="6">
-            <div class="grid-content ep-bg-purple">
-                <h3></h3>
-                <div id="line2" style="width:100%;height:200px"></div>
-            </div>
-        </el-col>
-        <el-col :span="6">
-            <div class="grid-content ep-bg-purple">
-                <h3></h3>
-                <div id="line3" style="width:100%;height:200px"></div>
-            </div>
-        </el-col>
-        <el-col :span="6">
-            <div class="grid-content ep-bg-purple">
-                <h3></h3>
-                <div id="line4" style="width:100%;height:200px"></div>
-            </div>
-        </el-col>
-    </el-row>
+<div id="seogtp_statistics_visitor_analytics">
+    <el-tabs v-model="activeName" type="card" class="demo-tabs" tab-position="left" @tab-click="handleClick">
+        <el-tab-pane label="User" name="first">User</el-tab-pane>
+        <el-tab-pane label="Config" name="second">Config</el-tab-pane>
+        <el-tab-pane label="Role" name="third">Role</el-tab-pane>
+        <el-tab-pane label="Task" name="fourth">Task</el-tab-pane>
+    </el-tabs>
+    <el-table ref="table" :data="tableData" row-key="id" :highlight-current-row="true" stripe>
+        <el-table-column v-for="(item, key) in columns" :key="key" :prop="key" :class-name="key" v-bind="item">
+        </el-table-column>
+    </el-table>
 </div>
 <style>
     #wpcontent {
         padding: 20px;
+    }
+
+    .cell {
+        text-align: center;
     }
 </style>
