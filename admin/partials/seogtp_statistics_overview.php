@@ -70,7 +70,7 @@
                     <div class="head_wrap">
                         <h3 class="title">
                             <span>访问来源</span>
-                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                            <a class="view_more" href="/wp-admin/admin.php?page=accessSource_analytics#refferPage">查看详情</a>
                         </h3>
                         <p class="dataline"></p>
                     </div>
@@ -84,7 +84,7 @@
                     <div class="head_wrap">
                         <h3 class="title">
                             <span>地域分布</span>
-                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                            <a class="view_more" href="/wp-admin/admin.php?page=accessSource_analytics#country">查看详情</a>
                         </h3>
                         <p class="dataline"></p>
                     </div>
@@ -98,7 +98,7 @@
                     <div class="head_wrap">
                         <h3 class="title">
                             <span>访问设备</span>
-                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                            <a class="view_more" href="/wp-admin/admin.php?page=accessSource_analytics#device">查看详情</a>
                         </h3>
                         <p class="dataline"></p>
                     </div>
@@ -112,7 +112,7 @@
                     <div class="head_wrap">
                         <h3 class="title">
                             <span>社媒来源</span>
-                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                            <a class="view_more" href="/wp-admin/admin.php?page=accessSource_analytics#refferPage">查看详情</a>
                         </h3>
                         <p class="dataline"></p>
                     </div>
@@ -126,7 +126,7 @@
                     <div class="head_wrap">
                         <h3 class="title">
                             <span>Top推荐页面</span>
-                            <a class="view_more" href="/wp-admin/admin.php?page=visitor_analytics">查看详情</a>
+                            <a class="view_more" href="/wp-admin/admin.php?page=accessSource_analytics#refferPage">查看详情</a>
                         </h3>
                         <p class="dataline"></p>
                     </div>

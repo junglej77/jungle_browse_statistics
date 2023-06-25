@@ -1,6 +1,7 @@
 <div id="seogtp_statistics_visitor_analytics">
     <div class="head_wrap">
-        在线人数： 397人
+        访客： {{tableData.length}}人
+        在线人数： {{tableData.filter(item => item.status == '在线').length}}人
         <el-tabs v-model="activeName" type="card" class="demo-tabs" tab-position="left" @tab-click="handleClick">
             <el-tab-pane label="新旧占比" name="first">新旧占比</el-tab-pane>
             <el-tab-pane label="访问次数" name="second">访问次数</el-tab-pane>
@@ -12,22 +13,23 @@
     <el-table ref="table" :data="tableData" row-key="id" :highlight-current-row="true" stripe>
         <el-table-column type="expand">
             <template #default="props">
-                <el-descriptions class="margin-top" :column="3" :size="size" border>
+                <el-descriptions class="margin-top" :column="2" :size="size" border>
                     <el-descriptions-item>
-                        <template #label>
-                            <div class="cell-item">
-                                新老访客
-                            </div>
-                        </template>
-                        {{props.row.visitCount>1?'老访客':'新访客'}}
+                        <p> 访客类型：{{props.row.visitCount>1?'老访客':'新访客'}}</p>
+                        <p> 首次来源：{{props.row.firstIndexSource}}</p>
+                        <p> 首次访问时间：{{props.row.firstIndexTime}}</p>
+                        <p> 总访问时长：{{props.row.totalTimeLength}}</p>
+                        <p> 总访问天数：{{props.row.totalVisitDayCount}}</p>
+                        <p> 总访问次数：{{props.row.totalVisitCount}}</p>
+                        <p> 总访问页面：{{props.row.totalVisitPageNum}}</p>
+                        <p> 总跳出次数：{{props.row.totalVisitBounceRate}}</p>
                     </el-descriptions-item>
                     <el-descriptions-item>
-                        <template #label>
-                            <div class="cell-item">
-                                Place
-                            </div>
-                        </template>
-                        Suzhou
+                        <el-timeline>
+                            <el-timeline-item v-for="log in props.row.AccessLog" :timestamp="log.time" placement="top">
+                                <h4>{{log.action}}</h4>
+                            </el-timeline-item>
+                        </el-timeline>
                     </el-descriptions-item>
                 </el-descriptions>
             </template>

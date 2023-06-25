@@ -46,12 +46,6 @@ const app = Vue.createApp({
 				country: {
 					label: "国家",
 				},
-				city: {
-					label: "城市",
-				},
-				province: {
-					label: "州/省",
-				},
 				device: {
 					label: "设备",
 				},
@@ -64,16 +58,38 @@ const app = Vue.createApp({
 				leaveTime: {
 					label: "离开时间",
 				},
-				status: {
-					label: "状态",
+				timeLength: {
+					label: "访问时长",
+				},
+				visitPageNum: {
+					label: "访问页面",
 				},
 				visitCount: {
 					label: "访问次数",
 				},
+				visitBounceRate: {
+					label: "跳出",
+				},
+				status: {
+					label: "状态",
+				}
+
 			},
 			tableData: [],
-
 			/**假数据 */
+			randomSourcePage: [
+				'直接访问',
+				'https://www.facebook.com/5g6h7j8k9',
+				'https://www.facebook.com/ad/0a1b2c3d4',
+				'https://www.baidu.com/6f7g8h9i0j',
+				'https://www.baidu.com/ad/1k2l3m4n5o',
+				'https://www.google.com/e5f6g7h8',
+				'https://www.google.com/ad/i9j0k1l2',
+				'https://www.instagram.com/ad/e5f6g7h8',
+				'https://www.instagram.com/ad/i9j0k1l2',
+				'https://www.youtube.com/5e6f7g8h',
+				'https://www.youtube.com/ad/9i0j1k2l',
+			],
 			randomCountries: [
 				{
 					country: "美国",
@@ -178,8 +194,11 @@ const app = Vue.createApp({
 
 				visitTime = visitTime - Math.random() * 1000;
 				let leaveTime = visitTime + Math.random() * 120 * 1000;
+				let firstIndexTime = visitTime - Math.random() * 6 * 60 * 60 * 1000;
+				let timeGap = ((leaveTime - visitTime) / 1000).toFixed(0);
 
-				let visitCount = Math.floor(Math.random() * 5) + 1
+				let visitPageNum = Math.floor(Math.random() * 5) + 1;
+				let visitCount = Math.floor(Math.random() * 5) + 1;
 				let status = getRandomItem(this.randomOnlineStatuses)
 				let email = getRandomItem(this.randomOnlineStatuses) ? `example@${i}.com` : ''
 
@@ -193,9 +212,33 @@ const app = Vue.createApp({
 					device: getRandomItem(this.randomDevices),
 					browser: getRandomItem(this.randomBrowsers),
 					visitTime: this.formatDate(visitTime),
-					leaveTime: this.formatDate(leaveTime),
+					leaveTime: status == 1 ? '--' : this.formatDate(leaveTime),
+					timeLength: timeGap + '秒',
+					visitPageNum: visitPageNum,
+					visitCount: visitCount,// 随机生成1-5的访问次数
+					visitBounceRate: status != 1 && visitPageNum == 1 && timeGap < 30,
 					status: status == 1 ? '在线' : '离线',
-					visitCount: visitCount  // 随机生成1-10的访问次数
+					firstIndexSource: getRandomItem(this.randomSourcePage),
+					firstIndexTime: this.formatDate(firstIndexTime),
+					totalTimeLength: (visitCount == 1 ? timeGap : parseInt(timeGap) + parseInt(Math.floor(Math.random() * 55))) + '秒',
+					totalVisitDayCount: visitCount == 1 ? 1 : visitCount + Math.floor(Math.random() * 5) + 1,
+					totalVisitCount: visitCount == 1 ? 1 : visitCount + Math.floor(Math.random() * 5) + 1,
+					totalVisitPageNum: visitCount == 1 ? visitPageNum : visitPageNum + Math.floor(Math.random() * 20) + 1,
+					totalVisitBounceRate: Math.floor(Math.random() * 3) + 1,
+					AccessLog: [
+						{
+							time: '2023.06.25 08:21:31',
+							action: '查看页面/contact',
+						},
+						{
+							time: '2023.06.24 12:21:31',
+							action: '查看页面/about',
+						},
+						{
+							time: '2023.06.23 11:21:31',
+							action: '查看页面/home',
+						}
+					]
 				});
 			}
 			this.tableData = data;
