@@ -25,11 +25,67 @@ echarts.use([
 	CanvasRenderer
 ]);
 // 注册必须的组件
+import { mdiCalendarMonth } from '@mdi/js';
 
 import { markRaw } from 'vue'
 const app = Vue.createApp({
 	data() {
 		return {
+			choosedTime: [], // 当前选择时间
+			compareTime: [], // 对比时间
+			xData: [], // 时间轴
+			choosedTimeStr: '',// 当前选择时间通译
+			compareTimeStr: '',// 对比时间通译
+			differenceInDays: 0,
+			shortcuts: [
+				{
+					text: '今天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						return [start, end]
+					},
+				},
+
+				{
+					text: '昨天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+						end.setTime(end.getTime() - 3600 * 1000 * 24 * 1)
+						return [start, end]
+					},
+				},
+				{
+					text: '过去7天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						start.setTime(start.getTime() - 3600 * 1000 * 24 * 6)
+						return [start, end]
+					},
+				},
+				{
+					text: '过去30天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						start.setTime(start.getTime() - 3600 * 1000 * 24 * 29)
+						return [start, end]
+					},
+				},
+				{
+					text: '过去90天',
+					value: () => {
+						const end = new Date()
+						const start = new Date()
+						start.setTime(start.getTime() - 3600 * 1000 * 24 * 89)
+						return [start, end]
+					},
+				}
+			],
+			mdiCalendarMonth: mdiCalendarMonth,
 			activeName: 'first',
 			queryForm: {
 				order: 'ASC',
@@ -179,6 +235,22 @@ const app = Vue.createApp({
 		}
 	},
 	mounted() {
+		/**时间调整 */
+		const today = new Date()
+		let yesterday = new Date(today);
+		yesterday.setDate(yesterday.getDate() - 1);
+		this.choosedTime = [today, today]
+		this.choosedTimeStr = '今天'
+		this.compareTime = [yesterday, yesterday]
+		this.compareTimeStr = '昨天'
+		this.xData = (() => {
+			var data = [];
+			for (var i = 0; i < 24; i++) {
+				data.push(i + "时");
+			}
+			return data;
+		})()
+		/**时间调整 */
 		this.getData()
 	},
 	methods: {

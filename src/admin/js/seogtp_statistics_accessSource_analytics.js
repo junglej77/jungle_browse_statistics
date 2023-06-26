@@ -25,11 +25,66 @@ echarts.use([
     CanvasRenderer
 ]);
 // 注册必须的组件
-
+import { mdiCalendarMonth } from '@mdi/js';
 import { markRaw } from 'vue'
 const app = Vue.createApp({
     data() {
         return {
+            choosedTime: [], // 当前选择时间
+            compareTime: [], // 对比时间
+            xData: [], // 时间轴
+            choosedTimeStr: '',// 当前选择时间通译
+            compareTimeStr: '',// 对比时间通译
+            differenceInDays: 0,
+            shortcuts: [
+                {
+                    text: '今天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        return [start, end]
+                    },
+                },
+
+                {
+                    text: '昨天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+                        end.setTime(end.getTime() - 3600 * 1000 * 24 * 1)
+                        return [start, end]
+                    },
+                },
+                {
+                    text: '过去7天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 6)
+                        return [start, end]
+                    },
+                },
+                {
+                    text: '过去30天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 29)
+                        return [start, end]
+                    },
+                },
+                {
+                    text: '过去90天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 89)
+                        return [start, end]
+                    },
+                }
+            ],
+            mdiCalendarMonth: mdiCalendarMonth,
             tabLocation: '',// 切换定位
             queryForm: {
                 order: 'ASC',
@@ -40,14 +95,20 @@ const app = Vue.createApp({
                 refferPage: {
                     label: "推荐页",
                 },
+                indexPage: {
+                    label: '入口页'
+                },
+                remarks: {
+                    label: "备注",
+                },
                 refferCount: {
                     label: "推荐人数",
                 },
                 averageVisitTime: {
-                    label: "平均访问时长",
+                    label: "平均访问网站时长",
                 },
                 averageVisitPageNum: {
-                    label: "平均访问页面数量",
+                    label: "平均访问网站页面数量",
                 },
                 bouncerate: {
                     label: "跳出率",
@@ -55,6 +116,36 @@ const app = Vue.createApp({
             },
             tableData: [],
             /**假数据 */
+            randomKeyWord: [
+                {
+                    keyword: '蝎子',
+                    type: '谷歌搜索'
+                },
+                {
+                    keyword: '蝎子',
+                    type: '站内'
+                },
+                {
+                    keyword: '河马',
+                    type: '站内'
+                },
+                {
+                    keyword: '大黄蜂',
+                    type: '站内'
+                },
+                {
+                    keyword: '蚂蚁',
+                    type: '站内'
+                },
+                {
+                    keyword: '蝎子',
+                    type: '百度搜索'
+                },
+                {
+                    keyword: '蝎子',
+                    type: 'bing搜索'
+                }
+            ],
             randomSourcePage: [
                 'https://www.facebook.com/5g6h7j8k9',
                 'https://www.baidu.com/6f7g8h9i0j',
@@ -67,6 +158,32 @@ const app = Vue.createApp({
                 'https://www.instagram.com/ad/i9j0k1l2',
                 'https://www.youtube.com/5e6f7g8h',
                 'https://www.facebook.com/ad/0a1b2c3d4',
+            ],
+            randomIndexPage: [
+                '/xiezi',
+                '/',
+                '/contact',
+                '/xiezi',
+                '/about',
+                '/xiezi',
+                '/xiezi',
+                '/xiezi',
+                '/hippo',
+                '/xiezi',
+                '/xiezi',
+            ],
+            randomRemarks: [
+                'facebook蝎子视频',
+                '',
+                '',
+                '谷歌广告',
+                '',
+                'youtube蝎子广告',
+                'instagram蝎子广告',
+                '百度广告',
+                'instagram河马广告',
+                'youtube蝎子帖子',
+                'facebook蝎子广告',
             ],
             randomCountries: [
                 {
@@ -157,13 +274,209 @@ const app = Vue.createApp({
         }
     },
     mounted() {
+        /**时间调整 */
+        const today = new Date()
+        let yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        this.choosedTime = [today, today]
+        this.choosedTimeStr = '今天'
+        this.compareTime = [yesterday, yesterday]
+        this.compareTimeStr = '昨天'
+        this.xData = (() => {
+            var data = [];
+            for (var i = 0; i < 24; i++) {
+                data.push(i + "时");
+            }
+            return data;
+        })()
+        /**时间调整 */
         var hash = window.location.hash.substring(1); // "country"
-        this.tabLocation = hash ? hash : 'device'
+        this.tabLocation = hash ? hash : 'refferPage'
         this.getData()
     },
     methods: {
+        openDatePicker(DatePicker) {
+            if (DatePicker == 'choosedTime' && this.shortcuts[0].text == '无对比') {
+                this.shortcuts.splice(0, 1);
+            } else if (DatePicker == 'compareTime' && this.shortcuts[0].text != '无对比') {
+                this.shortcuts.unshift({
+                    text: '无对比',
+                    value: () => {
+                        return ['', '']
+                    },
+                },);
+            }
+            this.$refs[DatePicker].focus()
+        },//按钮打开日期选择器
         handleClick(tab) {
             this.tabLocation = tab.props.name
+            if (tab.props.name == 'refferPage') {
+                this.columns = {
+                    refferPage: {
+                        label: "推荐页",
+                    },
+                    indexPage: {
+                        label: '入口页'
+                    },
+                    remarks: {
+                        label: "备注",
+                    },
+                    refferCount: {
+                        label: "推荐人数",
+                    },
+                    averageVisitTime: {
+                        label: "平均访问网站时长",
+                    },
+                    averageVisitPageNum: {
+                        label: "平均访问网站页面数量",
+                    },
+                    bouncerate: {
+                        label: "跳出率",
+                    }
+                }
+                this.tableData = this.randomSourcePage.map((item, i) => {
+                    let refferCount = (20 - i) * 13
+                    return {
+                        id: i,
+                        refferPage: item,
+                        indexPage: this.randomIndexPage[i],
+                        remarks: this.randomRemarks[i],
+                        refferCount: refferCount,
+                        averageVisitTime: (i + 3) * 7 + '秒',
+                        averageVisitPageNum: (i + 3) * 2,
+                        bouncerate: (i + 1.5) * 2 + '%',
+                    }
+                })
+
+            } else if (tab.props.name == 'country') {
+                this.columns = {
+                    country: {
+                        label: "国家",
+                    },
+                    visitor: {
+                        label: "访客",
+                    },
+                    averageVisitTime: {
+                        label: "平均访问网站时长",
+                    },
+                    averageVisitPageNum: {
+                        label: "平均访问网站页面数量",
+                    },
+                    bouncerate: {
+                        label: "跳出率",
+                    }
+                }
+
+                this.tableData = this.randomCountries.map((item, i) => {
+                    let visitor = (20 - i) * 13
+
+                    return {
+                        id: i,
+                        country: item.country,
+                        visitor: visitor,
+                        averageVisitTime: (i + 3) * 7 + '秒',
+                        averageVisitPageNum: (i + 3) * 2,
+                        bouncerate: (i + 1.5) * 2 + '%',
+                    }
+                })
+            } else if (tab.props.name == 'searchKeyword') {
+                this.columns = {
+                    keyword: {
+                        label: "关键词",
+                    },
+                    keywordType: {
+                        label: "搜索来源",
+                    },
+                    visitor: {
+                        label: "访客",
+                    },
+                    averageVisitTime: {
+                        label: "平均访问网站时长",
+                    },
+                    averageVisitPageNum: {
+                        label: "平均访问网站页面数量",
+                    },
+                    bouncerate: {
+                        label: "跳出率",
+                    }
+                }
+
+                this.tableData = this.randomKeyWord.map((item, i) => {
+                    let visitor = (20 - i) * 13
+
+                    return {
+                        id: i,
+                        keyword: item.keyword,
+                        keywordType: item.type,
+                        visitor: visitor,
+                        averageVisitTime: (i + 3) * 7 + '秒',
+                        averageVisitPageNum: (i + 3) * 2,
+                        bouncerate: (i + 1.5) * 2 + '%',
+                    }
+                })
+            } else if (tab.props.name == 'device') {
+                this.columns = {
+                    device: {
+                        label: "设备",
+                    },
+                    visitor: {
+                        label: "访客",
+                    },
+                    averageVisitTime: {
+                        label: "平均访问网站时长",
+                    },
+                    averageVisitPageNum: {
+                        label: "平均访问网站页面数量",
+                    },
+                    bouncerate: {
+                        label: "跳出率",
+                    }
+                }
+
+                this.tableData = this.randomDevices.map((item, i) => {
+                    let visitor = (20 - i) * 13
+
+                    return {
+                        id: i,
+                        device: item,
+                        visitor: visitor,
+                        averageVisitTime: (i + 3) * 7 + '秒',
+                        averageVisitPageNum: (i + 3) * 2,
+                        bouncerate: (i + 1.5) * 2 + '%',
+                    }
+                })
+            } else if (tab.props.name == 'browser') {
+                this.columns = {
+                    browser: {
+                        label: "浏览器",
+                    },
+                    visitor: {
+                        label: "访客",
+                    },
+                    averageVisitTime: {
+                        label: "平均访问网站时长",
+                    },
+                    averageVisitPageNum: {
+                        label: "平均访问网站页面数量",
+                    },
+                    bouncerate: {
+                        label: "跳出率",
+                    }
+                }
+
+                this.tableData = this.randomBrowsers.map((item, i) => {
+                    let visitor = (20 - i) * 13
+
+                    return {
+                        id: i,
+                        browser: item,
+                        visitor: visitor,
+                        averageVisitTime: (i + 3) * 7 + '秒',
+                        averageVisitPageNum: (i + 3) * 2,
+                        bouncerate: (i + 1.5) * 2 + '%',
+                    }
+                })
+            }
         },
         getData() {
             let getRandomItem = (array) => {
@@ -171,10 +484,13 @@ const app = Vue.createApp({
             }// 定义一个函数，用于从数组中选择一个随机元素
 
             this.tableData = this.randomSourcePage.map((item, i) => {
+                let refferCount = (20 - i) * 13
                 return {
                     id: i,
                     refferPage: item,
-                    refferCount: (20 - i) * 13,
+                    indexPage: this.randomIndexPage[i],
+                    remarks: this.randomRemarks[i],
+                    refferCount: refferCount,
                     averageVisitTime: (i + 3) * 7 + '秒',
                     averageVisitPageNum: (i + 3) * 2,
                     bouncerate: (i + 1.5) * 2 + '%',

@@ -25,11 +25,67 @@ echarts.use([
     CanvasRenderer
 ]);
 // 注册必须的组件
+import { mdiCalendarMonth } from '@mdi/js';
 
 import { markRaw } from 'vue'
 const app = Vue.createApp({
     data() {
         return {
+            choosedTime: [], // 当前选择时间
+            compareTime: [], // 对比时间
+            xData: [], // 时间轴
+            choosedTimeStr: '',// 当前选择时间通译
+            compareTimeStr: '',// 对比时间通译
+            differenceInDays: 0,
+            shortcuts: [
+                {
+                    text: '今天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        return [start, end]
+                    },
+                },
+
+                {
+                    text: '昨天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+                        end.setTime(end.getTime() - 3600 * 1000 * 24 * 1)
+                        return [start, end]
+                    },
+                },
+                {
+                    text: '过去7天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 6)
+                        return [start, end]
+                    },
+                },
+                {
+                    text: '过去30天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 29)
+                        return [start, end]
+                    },
+                },
+                {
+                    text: '过去90天',
+                    value: () => {
+                        const end = new Date()
+                        const start = new Date()
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 89)
+                        return [start, end]
+                    },
+                }
+            ],
+            mdiCalendarMonth: mdiCalendarMonth,
             activeName: 'first',
             queryForm: {
                 order: 'ASC',
@@ -37,60 +93,91 @@ const app = Vue.createApp({
                 data: {},
             },
             columns: {
-                ip: {
-                    label: "ip",
+                visitPage: {
+                    label: "受访页面",
                 },
-                email: {
-                    label: "注册邮箱",
-                },
-                country: {
-                    label: "国家",
-                },
-                device: {
-                    label: "设备",
-                },
-                browser: {
-                    label: "浏览器",
-                },
-                visitTime: {
-                    label: "访问时间",
-                },
-                leaveTime: {
-                    label: "离开时间",
-                },
-                timeLength: {
-                    label: "访问时长",
-                },
-                visitPageNum: {
-                    label: "访问页面",
+                uv: {
+                    label: "独立IP访客量",
                 },
                 visitCount: {
                     label: "访问次数",
                 },
-                visitBounceRate: {
-                    label: "跳出",
+                pvUv: {
+                    label: "访问深度",
                 },
-                status: {
-                    label: "状态",
+                averageVisitTime: {
+                    label: "平均访问时长",
+                },
+                visitBounceRate: {
+                    label: "跳出率",
+                },
+                visitExitRate: {
+                    label: "退出率",
+                },
+                operation: {
+                    label: '操作'
                 }
-
             },
             tableData: [],
+            dialogFormVisible: false,
+            singleData: {},
+            singleDataVisitorType: 'all',
+            radio3: '流量来源',
+            singleDataCountry: '',
+            singleDataTableData: [],
+            singleDataColumns: {
+                refferPage: {
+                    label: "流量来源",
+                },
+                uv: {
+                    label: "独立IP访客量",
+                },
+                visitCount: {
+                    label: "访问次数",
+                },
+                pvUv: {
+                    label: "访问深度",
+                },
+                averageVisitTime: {
+                    label: "平均访问时长",
+                },
+                visitBounceRate: {
+                    label: "跳出率",
+                },
+                visitExitRate: {
+                    label: "退出率",
+                }
+            },
             /**假数据 */
             randomSourcePage: [
-                '直接访问',
                 'https://www.facebook.com/5g6h7j8k9',
-                'https://www.facebook.com/ad/0a1b2c3d4',
                 'https://www.baidu.com/6f7g8h9i0j',
-                'https://www.baidu.com/ad/1k2l3m4n5o',
                 'https://www.google.com/e5f6g7h8',
-                'https://www.google.com/ad/i9j0k1l2',
-                'https://www.instagram.com/ad/e5f6g7h8',
-                'https://www.instagram.com/ad/i9j0k1l2',
-                'https://www.youtube.com/5e6f7g8h',
                 'https://www.youtube.com/ad/9i0j1k2l',
             ],
+            randomVisitPage: [
+                '/about-weller',
+                '/',
+                '/contact',
+                '/pcb_assembly/quote',
+                '/wellerpcb_news',
+                '/pcb-ipc-specific-minimum-surface-conductor-thickness',
+                '/pcb_layout_design/pcb_layout_design_quotation',
+                '/our_services/electronics-manufacturing-services',
+                '/pcb_fabrication/halogen-free',
+                '/faq',
+                '/pcb_fabrication/top-pcb-manufacturers-via-in-pad',
+                '/pcb_fabrication/top-flexible-printed-circuits-manufacturer',
+                '/pcb_fabrication/printed-circuit-boards-manufacturing-ipc-class-2-and-3',
+                '/pcb_fabrication/printed-circuit-board-dfm-analysis',
+                '/pcb_fabrication/advanced_hdi_pcb_manufacturing_capability',
+                '/pcb_fabrication/altium-designer-to-gerber-file',
+                '/price',
+            ],
             randomCountries: [
+                {
+                    country: "全部",
+                },
                 {
                     country: "美国",
                     cities: [
@@ -179,53 +266,76 @@ const app = Vue.createApp({
         }
     },
     mounted() {
+        /**时间调整 */
+        const today = new Date()
+        let yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        this.choosedTime = [today, today]
+        this.choosedTimeStr = '今天'
+        this.compareTime = [yesterday, yesterday]
+        this.compareTimeStr = '昨天'
+        this.xData = (() => {
+            var data = [];
+            for (var i = 0; i < 24; i++) {
+                data.push(i + "时");
+            }
+            return data;
+        })()
+        /**时间调整 */
         this.getData()
     },
     methods: {
         getData() {
-            let getRandomItem = (array) => {
-                return array[Math.floor(Math.random() * array.length)];
-            }// 定义一个函数，用于从数组中选择一个随机元素
-            var data = [];
-
-            for (var i = 0, visitTime = new Date().getTime() - 120 * 1000; i < 20; i++) {
-                let randomCountry = getRandomItem(this.randomCountries);
-                let randomCity = getRandomItem(randomCountry.cities);
-
-                visitTime = visitTime - Math.random() * 1000;
-                let leaveTime = visitTime + Math.random() * 120 * 1000;
-                let firstIndexTime = visitTime - Math.random() * 6 * 60 * 60 * 1000;
-                let timeGap = ((leaveTime - visitTime) / 1000).toFixed(0);
-
-                let visitPageNum = Math.floor(Math.random() * 5) + 1;
-                let visitCount = Math.floor(Math.random() * 5) + 1;
-                let status = getRandomItem(this.randomOnlineStatuses)
-
-                data.push({
+            this.tableData = this.randomVisitPage.map((item, i) => {
+                let uv = (20 - i) * 3
+                let visitCount = uv * (Math.floor(Math.random() * 21) + 1)
+                let averageVisitTime = Math.floor(Math.random() * 121) + 4
+                let visitBounceRate = (Math.random() * 31 + 0.01).toFixed(2)
+                let visitExitRate = (Math.random() * 81 + 0.01).toFixed(2)
+                return {
                     id: i,
-                    ip: `000000${19 - i}`,
-                    country: randomCountry.country,
-                    city: randomCity.city,
-                    province: randomCity.provinces,
-                    device: getRandomItem(this.randomDevices),
-                    browser: getRandomItem(this.randomBrowsers),
-                    visitTime: this.formatDate(visitTime),
-                    leaveTime: status == 1 ? '--' : this.formatDate(leaveTime),
-                    timeLength: timeGap + '秒',
-                    visitPageNum: visitPageNum,
-                    visitCount: visitCount,// 随机生成1-5的访问次数
-                    visitBounceRate: status != 1 && visitPageNum == 1 && timeGap < 30,
-                    status: status == 1 ? '在线' : '离线',
-                    firstIndexSource: getRandomItem(this.randomSourcePage),
-                    firstIndexTime: this.formatDate(firstIndexTime),
-                    totalTimeLength: (visitCount == 1 ? timeGap : parseInt(timeGap) + parseInt(Math.floor(Math.random() * 55))) + '秒',
-                    totalVisitDayCount: visitCount == 1 ? 1 : visitCount + Math.floor(Math.random() * 5) + 1,
-                    totalVisitCount: visitCount == 1 ? 1 : visitCount + Math.floor(Math.random() * 5) + 1,
-                    totalVisitPageNum: visitCount == 1 ? visitPageNum : visitPageNum + Math.floor(Math.random() * 20) + 1,
-                    totalVisitBounceRate: Math.floor(Math.random() * 3) + 1,
-                });
+                    visitPage: item,
+                    uv: uv,
+                    visitCount: visitCount,
+                    pvUv: visitCount / uv,
+                    averageVisitTime: averageVisitTime + '秒',
+                    visitBounceRate: visitBounceRate + '%',
+                    visitExitRate: visitExitRate + '%',
+                }
+            })
+        },
+        handlelookPop(row) {
+            this.singleData = row
+            this.dialogFormVisible = true
+            this.singleDataTableData = this.randomSourcePage.map((item, i) => {
+                let uv = (10 - i)
+                let visitCount = uv * (Math.floor(Math.random() * 21) + 1)
+                let averageVisitTime = Math.floor(Math.random() * 121) + 4
+                let visitBounceRate = (Math.random() * 31 + 0.01).toFixed(2)
+                let visitExitRate = (Math.random() * 81 + 0.01).toFixed(2)
+                return {
+                    id: i,
+                    refferPage: item,
+                    uv: uv,
+                    visitCount: visitCount,
+                    pvUv: visitCount / uv,
+                    averageVisitTime: averageVisitTime + '秒',
+                    visitBounceRate: visitBounceRate + '%',
+                    visitExitRate: visitExitRate + '%',
+                }
+            })
+        },
+        handleDialogClose() {
+            this.dialogFormVisible = false
+        },
+        singleDataQuery(type, val) {
+            if (type == 'country') {
+                if (val[val.length - 1] == '全部') {
+                    this.singleDataCountry = ['全部']
+                } else if (val[val.length - 1] != '全部' && val.includes('全部')) {
+                    this.singleDataCountry.splice(0, 1);
+                }
             }
-            this.tableData = data;
         },
         formatDate(date) {
             let now = new Date(date);
