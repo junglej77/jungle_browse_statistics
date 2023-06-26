@@ -254,6 +254,19 @@ const app = Vue.createApp({
 		this.getData()
 	},
 	methods: {
+		openDatePicker(DatePicker) {
+			if (DatePicker == 'choosedTime' && this.shortcuts[0].text == '无对比') {
+				this.shortcuts.splice(0, 1);
+			} else if (DatePicker == 'compareTime' && this.shortcuts[0].text != '无对比') {
+				this.shortcuts.unshift({
+					text: '无对比',
+					value: () => {
+						return ['', '']
+					},
+				},);
+			}
+			this.$refs[DatePicker].focus()
+		},//按钮打开日期选择器
 		getData() {
 			let getRandomItem = (array) => {
 				return array[Math.floor(Math.random() * array.length)];
