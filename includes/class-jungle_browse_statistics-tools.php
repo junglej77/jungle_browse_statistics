@@ -92,34 +92,16 @@ class JungleBrowseStatisticsTools
 		return time() . '-' . $ip;
 	}
 	// 判断访客是否是新访客，24小时之后再次访问就算老访客
-	public static function is_new_visitor($wpdb, $table_name, $cache_ip)
+	public static function is_new_visitor($cache_ip)
 	{
-		/**
-		 *  1， 当前访问时间，current_time
-		 *  2， 以 $cache_ip为桥梁获取相关数据
-		 *         访客最开始访问时间，
-		 * 			没登陆的话就是first_stored_time,
-		 * 			登录的话，就是当前u_id相同的增长id正序的第一个的first_stored_time
-		 *  3， current_time - first_stored_time  超过24小时就是老访客
-		 */
-		$is_new = 'new';
-		$sql = "SELECT * FROM $table_name WHERE cache_ip =%s";
-		$params = array($cache_ip);
-		if (is_user_logged_in()) {
-			$user_logged_id = get_current_user_id();
-			$sql = "SELECT * FROM $table_name WHERE u_id =%d";
-			$params = array($user_logged_id);
-		}
-		$sql .= " ORDER BY id ASC";
-		$sql .= " LIMIT 0, 1";
-		$query = $wpdb->prepare($sql, $params);
-		$results = $wpdb->get_results($query);
-		$first_stored_time = $results[0]->first_stored_time;
+		$is_new = 1;
+		$split = explode('-',$cache_ip);
+		$oldTime = $split[0];
 		$timezone = "Asia/Shanghai"; // 北京位于"Asia/Shanghai"时区
 		$dt = new DateTime($first_stored_time, new DateTimeZone($timezone));
 		$timestamp = $dt->getTimestamp(); // 最早访问的时间
 		$current_time = time();
-		$is_new = $current_time - $timestamp > 60 * 60 * 24 ? 'old' : 'new';
+		$is_new = $current_time - $timestamp > 60 * 60 * 24 ? 0 : 1;
 		return $is_new;
 	}
 	// 判断访客是否是在线访客， 根据暂缓的数据表
@@ -138,73 +120,135 @@ class JungleBrowseStatisticsTools
 	/**
 	 * 启动一个定时任务，检查在线访客有多少
 	 *  */ 
-	public static function look_online_visitor_count()
-	{//TODO 能进行到这里，但是没有执行后续流程
+	public static function online_visitor_count()
+	{
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
-		$count =$wpdb->get_var("SELECT COUNT(1) FROM $table_name");
-		update_option("jungle_browse_statistics_online_count",$count);
+		$table_name = 'seogtp_browse_statistics_guest';
+		$current_time = current_time('timestamp');
+		$previous_time = strtotime('-300 seconds', $current_time);
+		$formatted_time = date('Y-m-d H:i:s', $previous_time);
+
+		$count =$wpdb->get_var("SELECT COUNT(1) FROM $table_name WHERE create_time>$formatted_time");
+		update_option("seogtp_browse_statistics_online_count",$count);
 	}
 
 	/**
-	 * 定期删除未在线用户
+	 * 定期将非新访客的的新访客标志改为0
 	 */
-	public static function delete_old_records()
+	public static function update_new_guest_flag()
 	{
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'jungle_statistics_user_online';
+		$table_name = $wpdb->prefix . 'seogtp_browse_statistics_guest';
 		// 删除 now_time 和当前时间相差超过300秒的记录
-		$wpdb->query("DELETE FROM $table_name WHERE (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(now_time)) > 300 ");
+		$wpdb->query("UPDATE $table_name SET new_guest_flag=0 WHERE (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(create_time)) > 60*60*24 ");
 	}
-
+	
 	/**
-	 * 统计过去一天各访客页面访问时长
+	 * 获取访客ID
 	 */
-	public static function dailyStatistics()
+	public static function getGuestId($cache_ip){
+		
+    // global $wpdb;
+    $query = $wpdb->prepare("SELECT id FROM `seogtp_browse_statistics_guest` WHERE cache_ip = %s",$cache_ip);
+    $results = $wpdb->get_results($query);
+
+    if ($results) {
+        // // 查询到了记录
+        foreach ($results as $row) {
+            // 处理每一行数据
+            $guest_id = $row->id;
+			return $guest_id;
+			}
+		}
+	}
+	
+	/**
+	 * 统计过去一小时的访客页面访问时长，TODO 改代码.当前这小时的最新数据，查询的时候算。
+	 */
+	public static function hourlyStatistics()
 	{
 		global $wpdb;
-		$table_name_pages_view = $wpdb->prefix . 'jungle_statistics_pages_view';
-		$table_name_pages_view_statistics = $wpdb->prefix . 'jungle_statistics_pages_view_statistics';
-		$endTime = current_time('Y-m-d H:i:s');
-		$startTime = date('Y-m-d H:i:s', strtotime('-24 hours', strtotime($endTime)));
-		
+		$table_name_statistics_periodic = 'seogtp_browse_statistics_periodic'; 
+	
 		$today = date('Y-m-d', strtotime('today'));
 		$zeroHour = $today . ' 00:00:00';
-		$zeroHourFormatted = date('Y-m-d H:i:s', strtotime($zeroHour));
+		$today = date('Y-m-d H:i:s', strtotime($zeroHour));
+
+		$now = current_time('Y-m-d H');
+		$nowHour = $now . ':00:00';
+		$lastHour = date('Y-m-d H:i:s', strtotime('-1 hours', strtotime($nowHour)));
 		//直接统计访问时长viewTime，
 		$query = $wpdb->prepare(
-			"SELECT cache_ip, current_page, SUM(view_time) as view_time
-			FROM {$table_name_pages_view}
-			WHERE enter_time BETWEEN %s AND %s
-			GROUP BY cache_ip, current_page",
-			$startTime,
-			$endTime
+			"SELECT * 
+			FROM {$table_name_statistics_periodic}
+			WHERE create_time= %s AND `type`=1",
+			$zeroHour
 		);
 		// 执行查询
 		$results = $wpdb->get_results($query);
-		$targetArray = array(); // 目标数组
-
+		$inserOld=0;
+		$inserNew=0;
 		if ($results) {
 			// // 查询到了记录
 			foreach ($results as $row) {
 				// 处理每一行数据
-   				$ip = $row->cache_ip;
-   				$current_page = $row->current_page;
-				$view_time=$row->view_time;
+   				$browse_count = $row->browse_count;
+   				$new_guest_flag = $row->new_guest_flag;
 				$data = array(
-					'cache_ip' => $ip,
-					'view_page' => $current_page,
-					'view_time' =>$view_time,
-					'create_time' => $zeroHourFormatted,
+					'browse_count' => $browse_count,
+					'new_guest_flag' => $new_guest_flag,
+					'type' => 0,
+					'create_time' => $lastHour,
 				);
-				array_push($targetArray, $data);
+				$new_guest_flag==0?$inserOld=1:$inserNew=1;
+				//获取上一个小时的数据，
+				//当前小时数为1就直接插入，不为1，就获取上一个小时的数据，当前值减去上一个值，获取本小时的浏览量
+				if(date('H')==00){
+					$wpdb->insert( $table_name_pages_view_statistics, $data );
+				}else{
+					$query2 = $wpdb->prepare(
+						"SELECT browse_count 
+						FROM {$table_name_statistics_periodic}
+						WHERE `new_guest_flag`=%i AND `type`=0 AND create_time= %s ",
+						$new_guest_flag,$zeroHour
+					);
+					// 执行查询
+					$results2 = $wpdb->get_results($query2);
+			
+					if ($results2) {
+						foreach ($results2 as $row) {
+							$browse_count2 = $row->browse_count;
+							$data = array(
+								'browse_count' => $browse_count-$browse_count2,
+								'new_guest_flag' => $new_guest_flag,
+								'type' => 0,
+								'create_time' => $lastHour,
+							);
+							$wpdb->insert( $table_name_pages_view_statistics, $data );
+						}
+					}
+
+				}
 			} 
-		}else {
-			// // 没有查询到记录
 		}
-	foreach ( $targetArray as $row ) {
-		$wpdb->insert( $table_name_pages_view_statistics, $row );
-	}
+		if($inserOld==0){
+			$data = array(
+				'browse_count' => 0,
+				'new_guest_flag' =>0,
+				'type' => 0,
+				'create_time' => $lastHour,
+			);
+			$wpdb->insert( $table_name_pages_view_statistics, $data );
+		}
+		if($inserNew==0){
+			$data = array(
+				'browse_count' => 0,
+				'new_guest_flag' => 1,
+				'type' => 0,
+				'create_time' => $lastHour,
+			);
+			$wpdb->insert( $table_name_pages_view_statistics, $data );
+		}
 	}
 }
 

@@ -73,7 +73,7 @@ register_deactivation_hook(__FILE__, 'deactivate_jungle_browse_statistics');
 require plugin_dir_path(__FILE__) . 'includes/class-jungle_browse_statistics.php';
 
 //引入类
-require plugin_dir_path(__FILE__) . 'includes/service/class-jungle_browse_statistics_user_service.php';
+require plugin_dir_path(__FILE__) . 'includes/service/seogtp_browse_statistics_overview_service.php';
 
 // register_activation_hook(__FILE__, 'start_websocket_server');
 // function start_websocket_server()
@@ -100,14 +100,15 @@ add_action( 'jungle_browse_statistics_online_count_cron_hook', 'jungle_browse_st
  * 统计在线人数定时任务执行器
  */
 function jungle_browse_statistics_online_count_cron_exec(){
-	JungleBrowseStatisticsTools::delete_old_records();
-	JungleBrowseStatisticsTools::look_online_visitor_count();
+	//TODO是否需要额外再算当天访客数
+	JungleBrowseStatisticsTools::update_new_guest_flag();
+	JungleBrowseStatisticsTools::online_visitor_count();
 }
 
 function jungle_browse_statistics_online_count_cron_interval( $schedules ) { 
 	$schedules['5_minutes'] = array(
 		'interval' => 300,
-		'display'  => esc_html__( 'Every 30 Seconds' ), );
+		'display'  => esc_html__( 'Every 300 Seconds' ), );
 	return $schedules;
 }
 
@@ -117,29 +118,37 @@ function jungle_browse_statistics_online_count_deactivation() {
  wp_clear_scheduled_hook('jungle_browse_statistics_online_count_cron_hook');
 }
 
+//TODO 这个每小时统计数据的定时任务启动失败，待处理
+// register_activation_hook(__FILE__, 'jungle_browse_statistics_cron_activation');
 
-register_activation_hook(__FILE__, 'jungle_browse_statistics_cron_activation');
+// // function jungle_browse_statistics_cron_activation() {
 
-function jungle_browse_statistics_cron_activation() {
+// // 	if (! wp_next_scheduled ( 'jungle_browse_statistics_cron_hook' )) {
+// //         $next_midnight = strtotime( 'tomorrow midnight' );
+// // 		wp_schedule_event( $next_midnight , 'daily', 'jungle_browse_statistics_cron_hook');
+// // 	}
 
-	if (! wp_next_scheduled ( 'jungle_browse_statistics_cron_hook' )) {
-        $next_midnight = strtotime( 'tomorrow midnight' );
-		wp_schedule_event( $next_midnight , 'daily', 'jungle_browse_statistics_cron_hook');
-	}
+// //TODO 每小时
+// function jungle_browse_statistics_cron_activation() {
+// 	if (! wp_next_scheduled ( 'jungle_browse_statistics_cron_hook' )) {
+// 		$next_hour_time = new DateTime();
+// 		$next_hour_time->setTime($next_hour, 0, 0);
+// 		wp_schedule_event( $next_hour_time , 'hourly', 'jungle_browse_statistics_cron_hook');
+// 	}
 
-}
-add_action( 'jungle_browse_statistics_cron_hook', 'jungle_browse_statistics_cron_exec' );
+// }
+// add_action( 'jungle_browse_statistics_cron_hook', 'jungle_browse_statistics_cron_exec' );
 
 
-register_deactivation_hook(__FILE__, 'jungle_browse_statistics_cron_deactivation');
+// register_deactivation_hook(__FILE__, 'jungle_browse_statistics_cron_deactivation');
 
-function jungle_browse_statistics_cron_deactivation() {
- wp_clear_scheduled_hook('jungle_browse_statistics_cron_hook');
-}
+// function jungle_browse_statistics_cron_deactivation() {
+//  wp_clear_scheduled_hook('jungle_browse_statistics_cron_hook');
+// }
 
-function jungle_browse_statistics_cron_exec(){
-	JungleBrowseStatisticsTools::dailyStatistics();
-}
+// function jungle_browse_statistics_cron_exec(){
+// 	JungleBrowseStatisticsTools::hourlyStatistics();
+// }
 
 /**
  * 开始执行该插件。
